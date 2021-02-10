@@ -2,8 +2,7 @@
 
 ## Dependencies
 
--Node.js
--Python 3.7
-
+-- Node.js and npm
+-- Python 3.7
 
 ## Build
