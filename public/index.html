@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/custom.css">
+  <title>Senior Design</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="/js/index.js"></script>
+</head>
+<body>
+
+<nav class="navbar bg-light navbar-light navbar-expand-sm">
+  <div class="container">
+      <a class="navbar-brand d-none d-sm-inline-block" href="#">
+        <img src="/images/final_logo.svg" style="width: 60px;" alt="Stream Hopper Logo">
+      </a>
+      <div class="navbar-nav">
+          <a class="nav-item nav-link active" href="#">Home</a>
+          <a class="nav-item nav-link" href="#">Tutorial</a>
+          <a class="nav-item nav-link" href="#">About</a>
+          <a class="nav-item nav-link" href="#">Team</a>
+      </div>
+      <!-- <span class="navbar-text d-none d-xl-inline-block">The best in traditional and alternative medicine</span> -->
+  </div>
+</nav>
+
+<div class="jumbotron d-flex align-items-center flex-column justify-content-center bg-dark h-100  text-white" id="header">
+  <img src="/images/final_logo.svg" style="width: 20rem;" alt="Stream Hopper Logo" class="invisible">
+  <!-- <div class="display-4">Hello!</div>
+  <div class="display-4">Welcome to Stream Hopper!!</div>
+  <div class="display-4">Ready to twitch your stream?</div> -->
+  <div class="container py-5 display-4">
+  <div class="output display-4" id="output">
+    <h1 class="cursor display-4"></h1>
+    <p></p>
+  </div>
+  </div>
+
+  <a class="btn btn-danger btn-lg mt-1" href="#controls" role="button">Let's do it!</a>
+
+</div>
+
+<div class="row justify-content-evenly mt-5" id="controls" data-spy="scroll">
+  <div class="container col-3">
+    <div>
+      <ul class="list-group">
+        <li class="list-group-item active">Devices</li>
+        <li class="list-group-item">Smart Bulb <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Smart Bulb 2 <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">LED Board <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Other <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <!-- <li class="list-group-item">ADD <strong>+</strong></li> -->
+        <button type="button" class="list-group-item material-icons" data-toggle="popover" data-placement="bottom" title="Add a new device">add</button>
+
+        <!-- <button type="button" class="btn-close" aria-label="Close">x</button> -->
+    </div> <!-- List of Devices-->
+  </div> <!-- List container -->
+
+  <div class="container col-3">
+    <div>
+      <ul class="list-group">
+        <li class="list-group-item active">Presets</li>
+        <li class="list-group-item">Default <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Office <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Stream <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Calm <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <!-- <li class="list-group-item">ADD <strong>+</strong></li> -->
+        <button type="button" class="list-group-item material-icons data-toggle="popover" data-placement="bottom" title="Add a new Preset">add</button>
+    </div> <!-- List of Presets-->
+  </div> <!-- List Presets -->
+
+  <div class="container col-3">
+    <div>
+      <ul class="list-group">
+        <li class="list-group-item active">Triggers</li>
+        <li class="list-group-item">Chat <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Donation <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Channel Points <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <li class="list-group-item">Follows <button type="button" class="close material-icons delete" aria-label="Close">&#xE5C9;</button></li>
+        <!-- <li class="list-group-item">ADD <strong>+</strong></li> -->
+        <button type="button" class="list-group-item material-icons  data-toggle="popover" data-placement="bottom" title="Add a new Trigger">add</button>
+    </div> <!-- List of Trigger-->
+  </div> <!-- List Trigger -->
+</div> <!-- Lists>
