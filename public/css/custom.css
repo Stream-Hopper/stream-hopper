@@ -1,0 +1,85 @@
+body {
+  background-color:#333;
+}
+
+.output {
+  text-align:center;
+  font-family: 'Source Code Pro', monospace;
+  color:white;
+  h1 {
+    font-size:30px;
+  }
+}
+
+/* Cursor Styling */
+
+.cursor::after {
+  content:'';
+  display:inline-block;
+  margin-left:3px;
+  background-color:white;
+  animation-name:blink;
+  animation-duration:0.5s;
+  animation-iteration-count: infinite;
+}
+h1.cursor::after {
+  height:24px;
+  width:13px;
+}
+p.cursor::after {
+  height:13px;
+  width:6px;
+}
+
+@keyframes blink {
+  0% {
+    opacity:1;
+  }
+  49% {
+    opacity:1;
+  }
+  50% {
+    opacity:0;
+  }
+  100% {
+    opacity:0;
+  }
+}
+
+.jumbotron{
+  background-image: url('../images/bgimage.jpg');
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body,html {
+    height: 100%;
+}
+
+.list-group-item.active{
+  background-color: black;
+  border-color: black;
+}
+
+.speech-bubble {
+	position: relative;
+	background: #d17171;
+	border-radius: .4em;
+  width: 20%;
+}
+
+.speech-bubble:after {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border: 4px solid transparent;
+	border-right-color: #d17171;
+	border-left: 0;
+	margin-top: -4px;
+	margin-left: -4px;
+}
