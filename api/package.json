@@ -11,10 +11,14 @@
   "dependencies": {
     "@moebius/http-graceful-shutdown": "^1.1.0",
     "axios": "^0.21.1",
+    "cors": "^2.8.5",
     "dotenv-json": "^1.0.0",
+    "express": "^4.17.1",
     "socket.io-client": "^2.3.1",
     "sqlite3": "^5.0.2",
     "tmi.js": "^1.7.3",
+    "twitch": "^4.5.5",
+    "twitch-eventsub": "^4.5.5",
     "twitch-eventsub-ngrok": "^4.5.0",
     "twitch-pubsub-client": "^4.5.2"
   },
