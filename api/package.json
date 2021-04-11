@@ -1,0 +1,22 @@
+{
+  "name": "api_layer",
+  "version": "1.0.0",
+  "description": "This is the node.js module for the Api Layer",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@moebius/http-graceful-shutdown": "^1.1.0",
+    "axios": "^0.21.1",
+    "dotenv-json": "^1.0.0",
+    "socket.io-client": "^2.3.1",
+    "sqlite3": "^5.0.2",
+    "tmi.js": "^1.7.3",
+    "twitch-eventsub-ngrok": "^4.5.0",
+    "twitch-pubsub-client": "^4.5.2"
+  },
+  "devDependencies": {}
+}
