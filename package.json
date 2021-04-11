@@ -1,24 +1,44 @@
 {
-  "name": "api_layer",
-  "version": "1.0.0",
-  "description": "This is the node.js module for the Api Layer",
-  "main": "index.mjs",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
+  "name": "sd",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
-    "@moebius/http-graceful-shutdown": "^1.1.0",
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.5",
+    "@testing-library/user-event": "^12.8.0",
     "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
-    "cors": "^2.8.5",
-    "dotenv-json": "^1.0.0",
-    "socket.io-client": "^2.3.1",
-    "sqlite3": "^5.0.2",
-    "tmi.js": "^1.7.3",
-    "twitch-eventsub-ngrok": "^4.5.0",
-    "twitch-pubsub-client": "^4.5.2"
+    "bootstrap": "^4.6.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-redux": "^7.2.3",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
+    "reactstrap": "^8.9.0",
+    "use-local-storage": "^2.1.1",
+    "web-vitals": "^1.1.0"
   },
-  "devDependencies": {}
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
