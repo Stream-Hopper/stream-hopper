@@ -1,7 +1,6 @@
 import StreamLabsAPI from './api/streamlabs_api.js';
 import TwitchAPI from './api/twitch_api.js';
 import API from './api/api_server/server.js';
-// import hardware here
 import fetch from 'node-fetch';
 import axios from 'axios';
 await API();
@@ -17,7 +16,6 @@ console.log(res.data);
 let userData = await fetch('http://localhost:8080/api/getUser')
 .then(res => res.json())
 .then(json => {
-  console.log(json.data);
   return json.data;
 });
 console.log(userData);
@@ -46,7 +44,7 @@ const twitchUserID = userData[0].twitch_channel_id;
 //|////////////////////////////////////////////////
 //  Definitions
 //|////////////////////////////////////////////////
-class Event_Handler() {
+class Event_Handler {
     //  Function Definitions
     constructor() {
         // dictionary to hold set triggers by GUI
