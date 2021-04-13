@@ -68,7 +68,7 @@ class Event_Handler {
     // dictionary to hold set triggers by GUI
     globalThis.triggerDict = Object();
     // temporarily load dummy info into dict
-    globalThis.triggerDict['chatMessage'] = [{ triggerId: 0, triggerName: 'On Chat Message pulse',triggerType: 0, options: '#00FF00' }];
+    globalThis.triggerDict['chatMessage'] = [{ triggerId: 0, triggerName: 'On Chat Message pulse',triggerType: 0, options: '#0000FF' }];
     globalThis.triggerDict['chatMessage'].push({ triggerId: 1, triggerName: 'On Chat Message set color',triggerType: 1, options: '#FF0000' })
     console.log(this.triggerDict);
 
