@@ -13,9 +13,10 @@ function isWindowsOS(){
 }
 
 class StreamLabsAPI {
-  constructor(accessToken, socketToken){
+  constructor(accessToken, socketToken, eventHandlerFunc){
     this.accessToken = accessToken;
     this.socketToken = socketToken;
+    this.eventHandlerFunc = eventHandlerFunc;
     // Create websocket connection with StreamLabs
     this.streamlabs = io(`https://sockets.streamlabs.com?token=${socketToken}`, {transports: ['websocket']});
     // Successful connection
@@ -167,6 +168,7 @@ class StreamLabsAPI {
         "message": message,
         "type": "donation"
       }
+      this.eventHandlerFunc(response);
       console.log(`Received donation from ${name} for ${amount} ${currency}`);
     });
   }
