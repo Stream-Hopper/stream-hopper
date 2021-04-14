@@ -1,25 +1,26 @@
-# import GPIO and datetime
+# import GPIO and time
 import RPi.GPIO as GPIO
-import datetime
+import time
 
 # set GPIO numbering mode and define output pins
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(37,GPIO.OUT)
-GPIO.setup(38,GPIO.OUT)
-GPIO.setup(40,GPIO.OUT)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(20,GPIO.OUT)
+GPIO.setup(26,GPIO.OUT)
+GPIO.setup(21,GPIO.OUT)
 
-# Turn lights on and off based on the time
+# cycle those relays
 try:
     while True:
-        now = datetime.datetime.now().time()
-        if now.hour == 21 and now.minute == 5:
-            GPIO.output(40,True)
-        elif now.hour == 21 and now.minute == 6:
-            GPIO.output(38,True)
-        elif now.hour == 21 and now.minute == 7:
-            GPIO.output(40,False)
-            GPIO.output(38,False)
-        
+        GPIO.output(21,True)
+        time.sleep(1)
+        GPIO.output(21,False)
+        GPIO.output(20,True)
+        time.sleep(1)
+        GPIO.output(20,False)
+        GPIO.output(26,True)
+        time.sleep(1)
+        GPIO.output(26,False)
+
 finally:
 # cleanup the GPIO before finishing :)
     GPIO.cleanup()
