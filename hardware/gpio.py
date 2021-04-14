@@ -1,4 +1,6 @@
-# import GPIO and time
+#import GPIO and time and sys
+#To use for example type: 'python gpio.py 1 1'
+#The above command runs the gpio.py and turns on port 1 with the state of 1
 #!/usr/bin/python
 import RPi.GPIO as GPIO
 import time
@@ -14,11 +16,12 @@ GPIO.setup(20,GPIO.OUT)
 GPIO.setup(26,GPIO.OUT)
 
 if len(sys.argv) != 3:
-        raise ValueError('Please Provide a pin number to turn on/off')
+        raise ValueError('Please Provide a port number: 1 or 2 or 3 as well as state number: 1 or 0 to turn on/off')
 
 port_number_arg = sys.argv[1]
 state_arg = sys.argv[2]
 pin_number = 0
+state = True
 
 
 if(port_number_arg == '1'):
@@ -29,9 +32,22 @@ elif(port_number_arg == '2'):
 
 elif(port_number_arg == '3'):
         pin_number = 26
+else:
+        raise ValueError("Invalid Port Number")
 
-print(pin_number)
-GPIO.output(pin_number,True if state_arg == '1'  else False)
+if(state_arg == '1'):
+        state = True
+elif(state_arg == '0'):
+        state = False
+else:
+        raise ValueError("Invalid State Number")
+        
 
-#print(str(self.port_number))
+GPIO.output(pin_number,state)
+
+if(state_arg == '1'):
+        print("Port " + port_number_arg + " is On")
+        
+elif(state_arg == '0'):
+        print("Port " + port_number_arg + " is Off")
 
