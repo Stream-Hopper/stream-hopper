@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table } from 'reactstrap';
-import { Redirect,Link,useParams } from 'react-router-dom';
+import { Redirect,Link,useParams,useHistory } from 'react-router-dom';
 import axios from 'axios';
 import {useLocalStorage} from '../Hooks/useLocalStorage'
 
@@ -29,6 +29,7 @@ function UserInfo(){
     let search = window.location.search;
     let params = new URLSearchParams(search);
     let code = params.get('code');
+    let history = useHistory();
       
       function handleTwitchVerify(){
 
@@ -97,7 +98,8 @@ function UserInfo(){
             </tbody>
             </Table>
             <div>
-                <button disabled={twitchVerification!=='Verified'||streamLabsVerification!=='Verified'} onClick={()=>{window.location.href="https://kxc3244.github.io/sd"}}>Twitch it Up</button>
+                <button disabled={twitchVerification!=='Verified'||streamLabsVerification!=='Verified'} onClick={()=>{history.push('/control')}}>Twitch it Up</button>
+                <Link to='/control'>TRY</Link>
             </div>
             </div>
         </div>
