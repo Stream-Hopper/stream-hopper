@@ -178,16 +178,20 @@ class EventDatabase {
     ///////////////////////////////////////
     /// SELECT QUERIES
     ///////////////////////////////////////
-    listDevices() {
+    listDevices(cb) {
         let sql = `SELECT device_id, device_name FROM DEVICES;`;
-
+        // let returnData=
+        let data=[]
         this.db.all(sql, [], (err, rows) => {
             if (err) {
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+
+            cb(data);
         });
     }
 

@@ -292,6 +292,14 @@ export default async function API(){
       res.send({status: "success"});
     }
   });
+  app.get('/api/testDB', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listDevices(cb)
+  });
 
   // Close the server gracefully 
   process.on('SIGTERM', () => {
