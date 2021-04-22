@@ -29,7 +29,10 @@ var twitchUserID = null;
 
 // Create the Database instance
 var userDatabase = new Database.Database('./db.sqlite');
-
+var EventDB = new EventDatabase.EventDatabase('streamhopper.sqlite');
+let row, err = EventDB.testQuery();
+EventDB.device_INSERT('test3', 'WEMO', 4);
+EventDB.testQuery();
 
 async function getUserID(username, clientID){
   var baseUrl = `https://api.twitch.tv/kraken/users?login=${username}`;

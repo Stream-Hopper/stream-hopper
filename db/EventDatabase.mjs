@@ -18,11 +18,11 @@ class EventDatabase{
     // user_data table is in the database
     
   }
-
+ 
   device_INSERT(device_name, device_label, device_type) {
     let sql = `INSERT INTO DEVICES VALUES(NULL, ? , ? , ?);`;
 
-    db.run(sql, [device_name, device_label, device_type], function (err) {
+    this.db.run(sql, [device_name, device_label, device_type], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -160,6 +160,19 @@ class EventDatabase{
     });
 }
 
+testQuery(){
+  let sql = `SELECT * FROM DEVICES;`;
+
+  this.db.all(sql, [], (err, rows) => {
+      if (err) {
+          throw err;
+      }
+      rows.forEach((row) => {
+          console.log(row);
+      });
+  });
+}
+
  P2TMAP_DELETE(preset_id,trigger_id) {
     let sql = `DELETE FROM PRESET_2_TRIGGER_MAP WHERE preset_id=? AND trigger_id=?;`;
 
@@ -172,19 +185,6 @@ class EventDatabase{
     });
 }
 
-
-  device_INSERT(device_name,device_label, device_type) {
-        let sql = `INSERT INTO DEVICES VALUES(NULL, ? , ? , ?);`;
-
-        db.all(sql, [device_name,device_label, device_type], (err, rows) => {
-            if (err) {
-                throw err;
-            }
-            rows.forEach((row) => {
-                console.log(row.name);
-            });
-        });
-    }
 
     queryDatabase(callback){
       let rows = [];
