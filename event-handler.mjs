@@ -1,11 +1,13 @@
 import StreamLabsAPI from './api/streamlabs_api.js';
 import TwitchAPI from './api/twitch_api.js';
-import API from './api/api_server/server.js';
-import { LIFXAPI } from './hardware/lifxapi.mjs'
+import API from './api/api_server/server.mjs';
+import { LIFXAPI } from './hardware/lifxapi.mjs';
 //import { WEMOAPI } from './hardware/lifxapi.mjs'
 import fetch from 'node-fetch';
 import axios from 'axios';
 await API();
+
+
 
 // Called by the GUI
 const res = await axios.post("http://localhost:8080/api/updateUsername", {
@@ -93,7 +95,7 @@ class Event_Handler {
     }
   }
 }
-
+//yo
 // Example function calls
 const event_handler = new Event_Handler();
 event_handler.twitchClient.startEventSubs();

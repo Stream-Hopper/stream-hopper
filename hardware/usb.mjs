@@ -16,7 +16,7 @@ class USBAPI {
 
   async turnOffUSBPorts() {
     if(fs.existsSync('./uhubctl')){
-      const { stdout, stderr } = await exec('sudo uhubctl -l 1-1 -p 2 -a 0')
+      const { stdout, stderr } = await exec('sudo uhubctl/uhubctl -l 1-1 -a 0 -r 10')
       .catch(err => {
         console.log(err);
       });
@@ -27,7 +27,7 @@ class USBAPI {
 
   async turnOnUSBPorts() {
     if(fs.existsSync('./uhubctl')){
-      const { stdout, stderr } = await exec('sudo uhubctl -l 1-1 -p 2 -a 1')
+      const { stdout, stderr } = await exec('sudo uhubctl/uhubctl -l 1-1 -a 1 -r 10')
       .catch(err => {
         console.log(err);
       });
