@@ -4,11 +4,11 @@ BEGIN TRANSACTION;
 
 
 DROP TABLE IF EXISTS DEVICE_TYPE;
-CREATE TABLE DEVICE_TYPE (device_type_id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING UNIQUE NOT NULL);
-INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (1, 'USB');
-INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (2, 'Lifx');
-INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (3, 'Wemo');
-INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (4, 'GPIO');
+CREATE TABLE DEVICE_TYPE (device_type_id INTEGER PRIMARY KEY UNIQUE NOT NULL, device_type_name STRING UNIQUE NOT NULL);
+INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (1, 'USB');
+INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (2, 'Lifx');
+INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (3, 'Wemo');
+INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (4, 'GPIO');
 
 
 DROP TABLE IF EXISTS DEVICES;
