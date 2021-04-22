@@ -1,6 +1,6 @@
 import StreamLabsAPI from './api/streamlabs_api.js';
 import TwitchAPI from './api/twitch_api.js';
-import API from './api/api_server/server.js';
+import API from './api/api_server/server.mjs';
 import { LIFXAPI } from './hardware/lifxapi.mjs'
 //import { WEMOAPI } from './hardware/lifxapi.mjs'
 import fetch from 'node-fetch';
