@@ -3,6 +3,7 @@ import express from 'express';
 import Database from './db.mjs';
 import bodyParser from 'body-parser';
 import cors from 'cors'
+import EventDatabase from './../../db/EventDatabase.mjs'
 const app = express();
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,6 +29,7 @@ var twitchUserID = null;
 
 // Create the Database instance
 var userDatabase = new Database.Database('./db.sqlite');
+
 
 async function getUserID(username, clientID){
   var baseUrl = `https://api.twitch.tv/kraken/users?login=${username}`;

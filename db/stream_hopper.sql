@@ -1,12 +1,8 @@
---
--- File generated with SQLiteStudio v3.3.2 on Wed Apr 21 20:28:15 2021
---
--- Text encoding used: UTF-8
---
+
 PRAGMA foreign_keys = off;
 BEGIN TRANSACTION;
 
--- Table: DEVICE_TYPE
+
 DROP TABLE IF EXISTS DEVICE_TYPE;
 CREATE TABLE DEVICE_TYPE (device_type_id INTEGER PRIMARY KEY UNIQUE NOT NULL, name STRING UNIQUE NOT NULL);
 INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (1, 'USB');
@@ -14,22 +10,21 @@ INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (2, 'Lifx');
 INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (3, 'Wemo');
 INSERT INTO DEVICE_TYPE (device_type_id, name) VALUES (4, 'GPIO');
 
--- Table: DEVICES
+
 DROP TABLE IF EXISTS DEVICES;
 CREATE TABLE DEVICES (device_id INTEGER PRIMARY KEY UNIQUE NOT NULL, device_name STRING UNIQUE NOT NULL, device_label STRING, device_type REFERENCES DEVICE_TYPE (device_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL);
 INSERT INTO DEVICES (device_id, device_name, device_label, device_type) VALUES (1, 'lab bulb', 'Lightbulb', 2);
 
--- Table: PRESET_2_TRIGGER_MAP
+
 DROP TABLE IF EXISTS PRESET_2_TRIGGER_MAP;
 CREATE TABLE PRESET_2_TRIGGER_MAP (preset_id PRIMARY KEY REFERENCES PRESETS (preset_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_id INTEGER REFERENCES TRIGGERS (trigger_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL);
 
--- Table: PRESETS
 DROP TABLE IF EXISTS PRESETS;
 CREATE TABLE PRESETS (preset_id INTEGER PRIMARY KEY UNIQUE NOT NULL, preset_name STRING UNIQUE NOT NULL, default_preset BOOLEAN NOT NULL);
 INSERT INTO PRESETS (preset_id, preset_name, default_preset) VALUES (1, 'Default Preset', 1);
 INSERT INTO PRESETS (preset_id, preset_name, default_preset) VALUES (3, 'TEST PRESET', 0);
 
--- Table: TRIGGER_ACTIONS
+
 DROP TABLE IF EXISTS TRIGGER_ACTIONS;
 CREATE TABLE TRIGGER_ACTIONS (trigger_action_id INTEGER PRIMARY KEY UNIQUE NOT NULL, "action" STRING NOT NULL, device_type INTEGER REFERENCES DEVICE_TYPE (device_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL);
 INSERT INTO TRIGGER_ACTIONS (trigger_action_id, "action", device_type) VALUES (1, 'setState', 2);
@@ -44,7 +39,7 @@ INSERT INTO TRIGGER_ACTIONS (trigger_action_id, "action", device_type) VALUES (9
 INSERT INTO TRIGGER_ACTIONS (trigger_action_id, "action", device_type) VALUES (10, 'gpioOn', 4);
 INSERT INTO TRIGGER_ACTIONS (trigger_action_id, "action", device_type) VALUES (11, 'gpioOff', 4);
 
--- Table: TRIGGER_TYPE
+
 DROP TABLE IF EXISTS TRIGGER_TYPE;
 CREATE TABLE TRIGGER_TYPE (trigger_type_id INTEGER PRIMARY KEY UNIQUE NOT NULL, trigger_type_name STRING UNIQUE NOT NULL);
 INSERT INTO TRIGGER_TYPE (trigger_type_id, trigger_type_name) VALUES (1, 'donation');
@@ -55,15 +50,10 @@ INSERT INTO TRIGGER_TYPE (trigger_type_id, trigger_type_name) VALUES (5, 'cheer'
 INSERT INTO TRIGGER_TYPE (trigger_type_id, trigger_type_name) VALUES (6, 'chatMessage');
 INSERT INTO TRIGGER_TYPE (trigger_type_id, trigger_type_name) VALUES (7, 'resub');
 
--- Table: TRIGGERS
 DROP TABLE IF EXISTS TRIGGERS;
 CREATE TABLE TRIGGERS (trigger_id INTEGER PRIMARY KEY UNIQUE NOT NULL, trigger_name STRING NOT NULL UNIQUE, device_id INTEGER REFERENCES DEVICES (device_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_type INTEGER REFERENCES TRIGGER_TYPE (trigger_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_action_id INTEGER REFERENCES TRIGGER_ACTIONS (trigger_action_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, options STRING);
 INSERT INTO TRIGGERS (trigger_id, trigger_name, device_id, trigger_type, trigger_action_id, options) VALUES (1, 'test_trigger', 1, 6, 1, '#FFFFFF');
 INSERT INTO TRIGGERS (trigger_id, trigger_name, device_id, trigger_type, trigger_action_id, options) VALUES (2, 'TEST TRIGGER 2', 1, 2, 2, '#BBBBBB');
-
--- Table: USER
-DROP TABLE IF EXISTS USER;
-CREATE TABLE USER (user_id INTEGER PRIMARY KEY UNIQUE NOT NULL, twitch_access_token VARCHAR (50), twitch_refresh_token VARCHAR (50), twitch_channel_username VARCHAR (50), twitch_channel_id VARCHAR (50), twitch_client_secret VARCHAR (50), twitch_client_id VARCHAR (50), streamlabs_access_token VARCHAR (50), streamlabs_socket_token VARCHAR (250), streamlabs_client_secret VARCHAR (50), streamlabs_refresh_token VARCHAR (60), streamlabs_client_id VARCHAR (50));
 
 COMMIT TRANSACTION;
 PRAGMA foreign_keys = on;
