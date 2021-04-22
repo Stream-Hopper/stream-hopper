@@ -34,7 +34,7 @@ class EventDatabase{
  device_UPDATE(device_id, device_name, device_label, device_type) {
     let sql = `UPDATE DEVICES SET device_name=?, device_label=?, device_type=? WHERE device_id=?;`;
 
-    db.run(sql, [device_name, device_label, device_type, device_id], function (err) {
+    this.db.run(sql, [device_name, device_label, device_type, device_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -46,7 +46,7 @@ class EventDatabase{
  device_DELETE(device_id) {
     let sql = `DELETE FROM DEVICES WHERE device_id=?;`;
 
-    db.run(sql, [device_id], function (err) {
+    this.db.run(sql, [device_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -61,7 +61,7 @@ class EventDatabase{
  presets_INSERT(preset_name, default_preset) {
     let sql = `INSERT INTO PRESETS VALUES(NULL,?,?);`;
 
-    db.run(sql, [preset_name, default_preset], function (err) {
+    this.db.run(sql, [preset_name, default_preset], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -73,7 +73,7 @@ class EventDatabase{
  presets_UPDATE(preset_id, preset_name, default_preset) {
     let sql = `UPDATE PRESETS SET preset_name=?, default_preset=? WHERE preset_id=?;`;
 
-    db.run(sql, [preset_name, default_preset, preset_id], function (err) {
+    this.db.run(sql, [preset_name, default_preset, preset_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -85,7 +85,7 @@ class EventDatabase{
  presets_DELETE(preset_id) {
     let sql = `DELETE FROM PRESETS WHERE preset_id=?;`;
 
-    db.run(sql, [preset_id], function (err) {
+    this.db.run(sql, [preset_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -100,7 +100,7 @@ class EventDatabase{
  triggers_INSERT(trigger_name, device_id, trigger_type, trigger_action_id, options,) {
     let sql = `INSERT INTO TRIGGERS VALUES(NULL,?,?,?,?,?);`;
 
-    db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options], function (err) {
+    this.db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -112,7 +112,7 @@ class EventDatabase{
  triggers_UPDATE(trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id) {
     let sql = `UPDATE TRIGGERS SET trigger_name=?, device_id=?, trigger_type=?, trigger_action_id=?, options=? WHERE trigger_id=?;`;
 
-    db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options,trigger_id], function (err) {
+    this.db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options,trigger_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -124,7 +124,7 @@ class EventDatabase{
  triggers_DELETE(trigger_id) {
     let sql = `DELETE FROM TRIGGERS WHERE trigger_id=?;`;
 
-    db.run(sql, [trigger_id], function (err) {
+    this.db.run(sql, [trigger_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -139,7 +139,7 @@ class EventDatabase{
  P2TMAP_INSERT(trigger_id, preset_id) {
     let sql = `INSERT INTO PRESET_2_TRIGGER_MAP VALUES(?,?);`;
 
-    db.run(sql, [preset_id,trigger_id], function (err) {
+    this.db.run(sql, [preset_id,trigger_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -151,7 +151,7 @@ class EventDatabase{
  P2TMAP_UPDATE(trigger_id, preset_id) {
     let sql = `UPDATE PRESET_2_TRIGGER_MAP SET trigger_id=? WHERE preset_id=?;`;
 
-    db.run(sql, [trigger_id, preset_id], function (err) {
+    this.db.run(sql, [trigger_id, preset_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
@@ -176,7 +176,7 @@ testQuery(){
  P2TMAP_DELETE(preset_id,trigger_id) {
     let sql = `DELETE FROM PRESET_2_TRIGGER_MAP WHERE preset_id=? AND trigger_id=?;`;
 
-    db.run(sql, [preset_id,trigger_id], function (err) {
+    this.db.run(sql, [preset_id,trigger_id], function (err) {
         if (err) {
             return console.log(err.message);
         }
