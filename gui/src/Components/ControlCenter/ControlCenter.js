@@ -11,20 +11,30 @@ function ControlCenter(){
     const [deviceData, setDeviceData] = useState([])
     const [presetData,setPresetData] = useState([])
     const [triggerData,setTriggerData] = useState([])
+    const [deviceTypeSelction,setDeviceTypeSelction] = useState()
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
 
-    // var EventDB = new EventDatabase.EventDatabase('db/streamhopper.sqlite');
 
-    // EventDB.listDevices()
+    function deviceSubmit(){
+        axios.post("http://localhost:8080/api/addDevice",{deviceName: `${document.getElementById('deviceName').value}`, deviceLabel: `${document.getElementById('deviceLabel').value}`, deviceType: `${document.getElementById('deviceType').value}`})
+        .then(res=>{
+            console.log(res,'RESPONSE DEVICE')
+            // setDeviceData(res.data)
+        })
+
+        toggleDevice()
+    }
+
+   
     useEffect(() => {
         axios.get("http://localhost:8080/api/getDevices")
         .then(res=>{
             console.log(res.data,'DEVICE LIST')
             setDeviceData(res.data)
         })
-      },[]);
+      },[deviceModal]);
 
       useEffect(() => {
         axios.get("http://localhost:8080/api/getPresets")
@@ -82,7 +92,7 @@ function ControlCenter(){
               <Form>
                 <FormGroup>
                     <Label for="deviceName">Device Name</Label>
-                    <Input type="text" name="deviceName" id="deviceName" placeholder="Device Name" />
+                    <Input type="text" name="deviceName" id="deviceName" placeholder="Device Name" required/>
                 </FormGroup>
                 <FormGroup>
                     <Label for="deviceLabel">Device Label</Label>
@@ -90,7 +100,7 @@ function ControlCenter(){
                 </FormGroup>
                 <FormGroup>
                     <Label for="deviceType">Device Type</Label>
-                    <Input type="select" name="deviceType" id="deviceType">
+                    <Input type="select" name="deviceType" id="deviceType" onChange={(e)=>setDeviceTypeSelction(e.target.value)}>
                     <option>Lifx</option>
                     <option>Wemo</option>
                     <option>USB</option>
@@ -100,7 +110,8 @@ function ControlCenter(){
                 </Form>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={toggleDevice}>Submit</Button>{' '}
+                {/* <Button color="primary" onClick={toggleDevice}>Submit</Button>{' '} */}
+                <Button color="primary" onClick={()=>{deviceSubmit()}}>Submit</Button>{' '}
                 <Button color="danger" onClick={toggleDevice}>Cancel</Button>
               </ModalFooter>
             </Modal>
@@ -244,6 +255,15 @@ function ControlCenter(){
                 </FormGroup>
                 <div>
                     Preset List:
+                    {
+                    presetData.map((i)=>{
+                        return(
+                            <ul>
+                                <li>{i.preset_name}</li>
+                            </ul>
+                        )
+                    })
+                    }  
                 </div>
                 </Form>
               </ModalBody>
