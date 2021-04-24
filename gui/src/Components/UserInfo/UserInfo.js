@@ -99,7 +99,6 @@ function UserInfo(){
             </Table>
             <div>
                 <button disabled={twitchVerification!=='Verified'||streamLabsVerification!=='Verified'} onClick={()=>{history.push('/control')}}>Twitch it Up</button>
-                <Link to='/control'>TRY</Link>
             </div>
             </div>
         </div>
