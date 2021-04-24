@@ -22,22 +22,16 @@ class EventDatabase {
     ///////////////////////////////////////
     /// DEVICE QUERIES
     ///////////////////////////////////////
-    device_INSERT(device_name, device_label, device_type,cb) {
+    device_INSERT(device_name, device_label, device_type) {
         let sql = `INSERT INTO DEVICES VALUES(NULL, ? , ? , ?);`;
-        // let response = 'Messed Up'
+
         this.db.run(sql, [device_name, device_label, device_type], function (err) {
             if (err) {
-                // response = err.message
-                cb(err.message)
                 return console.log(err.message);
             }
-            // response = 'Device Added'
-            cb('Device Added')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
-
-        return response;
     }
 
     device_UPDATE(device_id, device_name, device_label, device_type) {
@@ -201,25 +195,21 @@ class EventDatabase {
         });
     }
 
-    lisPresets(cb) {
+    lisPresets() {
         let sql = `SELECT preset_id, preset_name FROM PRESETS;`;
-        let data=[]
+
         this.db.all(sql, [], (err, rows) => {
             if (err) {
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
-                data.push(row)
             });
-            cb(data);
-
         });
     }
 
-    listTriggers(cb) {
+    listTriggers() {
         let sql = `SELECT trigger_id, trigger_name FROM TRIGGERS;`;
-        let data=[]
 
         this.db.all(sql, [], (err, rows) => {
             if (err) {
@@ -227,9 +217,7 @@ class EventDatabase {
             }
             rows.forEach((row) => {
                 console.log(row);
-                data.push(row)
             });
-            cb(data)
         });
     }
 

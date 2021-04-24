@@ -292,7 +292,8 @@ export default async function API(){
       res.send({status: "success"});
     }
   });
-  app.get('/api/testDB', async (req, res) => {
+  // DEVICE ENDPOINTS
+  app.get('/api/getDevices', async (req, res) => {
     // EventDB.listDevices()
     const cb = function (data) {
       
@@ -300,6 +301,49 @@ export default async function API(){
     }
     EventDB.listDevices(cb)
   });
+  app.post('/api/addDevice', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
+  });
+  // PRESET ENDPOINTS
+  app.get('/api/getpresets', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.lisPresets(cb)
+  });
+  app.post('/api/addPresets', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
+  });
+  // TRIGGER ENDPOINTS
+  app.get('/api/getTriggers', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listTriggers(cb)
+  });
+  app.post('/api/addPresets', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
+  });
+
 
   // Close the server gracefully 
   process.on('SIGTERM', () => {

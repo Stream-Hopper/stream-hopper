@@ -1,21 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import{Table,Button,Modal,ModalBody,ModalHeader,ModalFooter,Form, FormGroup, Label, Input, FormText} from 'reactstrap'
+// import EventDatabase from '../../EventDatabase.mjs'
+import axios from 'axios'
 
 function ControlCenter(){
 
     const [deviceModal,setDeviceModal] = useState(false)
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
+    const [deviceData, setDeviceData] = useState([])
+    const [presetData,setPresetData] = useState([])
+    const [triggerData,setTriggerData] = useState([])
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
 
-    
+    // var EventDB = new EventDatabase.EventDatabase('db/streamhopper.sqlite');
 
+    // EventDB.listDevices()
+    useEffect(() => {
+        axios.get("http://localhost:8080/api/getDevices")
+        .then(res=>{
+            console.log(res.data,'DEVICE LIST')
+            setDeviceData(res.data)
+        })
+      },[]);
+
+      useEffect(() => {
+        axios.get("http://localhost:8080/api/getPresets")
+        .then(res=>{
+            console.log(res.data,'PRESET LIST')
+            setPresetData(res.data)
+        })
+      },[]);
+
+      useEffect(() => {
+        axios.get("http://localhost:8080/api/getTriggers")
+        .then(res=>{
+            console.log(res.data,'TRIGGERS LIST')
+            setTriggerData(res.data)
+        })
+      },[]);
 
     return(
 
-        <div >
+        <div>
            <div style={{width:"30%",display:"inline-block",margin:"10px"}}>
            <Table bordered>
             <thead>
@@ -24,7 +53,7 @@ function ControlCenter(){
                 </tr>
             </thead>
             <tbody>
-                <tr>
+                {/* <tr>
                 <td>Mark</td>
                 </tr>
                 <tr>
@@ -32,7 +61,16 @@ function ControlCenter(){
                 </tr>
                 <tr>
                 <td>Larry</td>
-                </tr>
+                </tr> */}
+                {
+                    deviceData.map((i)=>{
+                        return(
+                            <tr>
+                                <td>{i.device_name}</td>
+                            </tr>
+                        )
+                    })
+                }
                 <tr>
                 <td><button onClick={()=>{setDeviceModal(true)}}>Add a Device</button></td>
                 </tr>
@@ -76,7 +114,7 @@ function ControlCenter(){
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    {/* <tr>
                     <td>Mark</td>
                     </tr>
                     <tr>
@@ -84,7 +122,16 @@ function ControlCenter(){
                     </tr>
                     <tr>
                     <td>Larry</td>
-                    </tr>
+                    </tr> */}
+                    {
+                    presetData.map((i)=>{
+                        return(
+                            <tr>
+                                <td>{i.preset_name}</td>
+                            </tr>
+                        )
+                    })
+                    }   
                     <tr>
                     <td><button onClick={()=>{setPresetModal(true)}}>Add a Preset</button></td>
                     </tr>
@@ -124,7 +171,7 @@ function ControlCenter(){
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    {/* <tr>
                     <td>Mark</td>
                     </tr>
                     <tr>
@@ -132,7 +179,16 @@ function ControlCenter(){
                     </tr>
                     <tr>
                     <td>Larry</td>
-                    </tr>
+                    </tr> */}
+                    {
+                    triggerData.map((i)=>{
+                        return(
+                            <tr>
+                                <td>{i.trigger_name}</td>
+                            </tr>
+                        )
+                    })
+                     }      
                     <tr>
                     <td><button onClick={()=>{toggleTrigger()}}>Add a Trigger</button></td>
                     </tr>
