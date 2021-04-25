@@ -309,6 +309,14 @@ export default async function API(){
     }
     res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
   });
+  app.get('/api/getActionsPerDevice', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listActionsPerDevice(req.body.id,cb)
+  });
   // PRESET ENDPOINTS
   app.get('/api/getpresets', async (req, res) => {
     // EventDB.listDevices()
@@ -324,7 +332,7 @@ export default async function API(){
       
       res.send(data)
     }
-    res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
+    EventDB.presets_INSERT(req.body.presetName,req.body.defaultPreset,cb)
   });
   // TRIGGER ENDPOINTS
   app.get('/api/getTriggers', async (req, res) => {
@@ -335,13 +343,13 @@ export default async function API(){
     }
     EventDB.listTriggers(cb)
   });
-  app.post('/api/addPresets', async (req, res) => {
+  app.post('/api/addTriggerss', async (req, res) => {
     // EventDB.listDevices()
     const cb = function (data) {
       
       res.send(data)
     }
-    res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
+    EventDB.triggers_INSERT(req.body.triggerName,req.body.triggerType,req.body.triggerActionId,req.body.options,cb)
   });
 
 

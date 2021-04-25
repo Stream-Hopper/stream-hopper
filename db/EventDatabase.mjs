@@ -67,13 +67,15 @@ class EventDatabase {
     ///////////////////////////////////////
     /// PRESETS QUERIES
     ///////////////////////////////////////
-    presets_INSERT(preset_name, default_preset) {
+    presets_INSERT(preset_name, default_preset,cb) {
         let sql = `INSERT INTO PRESETS VALUES(NULL,?,?);`;
 
         this.db.run(sql, [preset_name, default_preset], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('Preset Added')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -106,13 +108,15 @@ class EventDatabase {
     ///////////////////////////////////////
     /// TRIGGERS QUERIES
     ///////////////////////////////////////
-    triggers_INSERT(trigger_name, device_id, trigger_type, trigger_action_id, options,) {
+    triggers_INSERT(trigger_name, device_id, trigger_type, trigger_action_id, options,cb) {
         let sql = `INSERT INTO TRIGGERS VALUES(NULL,?,?,?,?,?);`;
 
         this.db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('Trigger Added')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -259,20 +263,24 @@ class EventDatabase {
         });
     }
     
-    listActionsPerDevice(device_id) {
+    listActionsPerDevice(device_id,cb) {
         let sql = `SELECT trigger_action_id, action FROM TRIGGER_ACTIONS WHERE device_type = (SELECT device_type FROM DEVICES WHERE device_id=?);`;
-
+        let data=[]
         this.db.all(sql, [device_id], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
+
         });
     }
 
-    listPresetsPreTrigger(trigger_id) {
+    listPresetsPerTrigger(trigger_id) {
         let sql = `SELECT preset_id, preset_name FROM PRESETS WHERE preset_id = (SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?);`;
 
         this.db.all(sql, [trigger_id], (err, rows) => {

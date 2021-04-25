@@ -9,22 +9,46 @@ function ControlCenter(){
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
     const [deviceData, setDeviceData] = useState([])
+    const [deviceId,setDeviceId] = useState()
     const [presetData,setPresetData] = useState([])
     const [triggerData,setTriggerData] = useState([])
+    const [actionsData,setActionsData] = useState([])
     const [deviceTypeSelction,setDeviceTypeSelction] = useState()
+    const [presetSelection,setPresetSelection] = useState()
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
+
+    console.log(presetSelection,'THIS IS THE LIST')
 
 
     function deviceSubmit(){
         axios.post("http://localhost:8080/api/addDevice",{deviceName: `${document.getElementById('deviceName').value}`, deviceLabel: `${document.getElementById('deviceLabel').value}`, deviceType: `${document.getElementById('deviceType').value}`})
         .then(res=>{
             console.log(res,'RESPONSE DEVICE')
-            // setDeviceData(res.data)
+            toggleDevice()
         })
 
-        toggleDevice()
+    }
+    function presetSubmit(){
+        axios.post("http://localhost:8080/api/addPresets",{presetName: `${document.getElementById('presetName').value}`, defaultPreset: document.getElementById("defaultPreset").checked? 1:0 })
+        .then(res=>{
+            console.log(res,'RESPONSE PRESET')
+            togglePreset()
+        })
+
+    }
+
+    function getActionsPerDevice(id){
+        axios.get()
+    }
+
+    function triggerSubmit(){
+        axios.post("http://localhost:8080/api/addTriggers",{presetName: `${document.getElementById('presetName').value}`, defaultPreset: document.getElementById("defaultPreset").checked? 1:0 })
+        .then(res=>{
+            console.log(res,'RESPONSE PRESET')
+            togglePreset()
+        })
     }
 
    
@@ -42,7 +66,7 @@ function ControlCenter(){
             console.log(res.data,'PRESET LIST')
             setPresetData(res.data)
         })
-      },[]);
+      },[presetModal]);
 
       useEffect(() => {
         axios.get("http://localhost:8080/api/getTriggers")
@@ -51,6 +75,14 @@ function ControlCenter(){
             setTriggerData(res.data)
         })
       },[]);
+
+      useEffect(() => {
+        axios.get("http://localhost:8080/api/getActionsPerDevice",{id: deviceId})
+        .then(res=>{
+            console.log(res.data,'ACTIONS LIST')
+            setActionsData(res.data)
+        })
+      },[deviceId]);
 
     return(
 
@@ -161,14 +193,14 @@ function ControlCenter(){
                 </div>
                 <FormGroup check>
                     <Label check>
-                    <Input type="checkbox" />{' '}
+                    <Input type="checkbox" id="defaultPreset"/>{' '}
                     Default
                     </Label>
                 </FormGroup>
                 </Form>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={togglePreset}>Submit</Button>{' '}
+                <Button color="primary" onClick={()=>{presetSubmit()}}>Submit</Button>{' '}
                 <Button color="danger" onClick={togglePreset}>Cancel</Button>
               </ModalFooter>
             </Modal>
@@ -216,10 +248,19 @@ function ControlCenter(){
                 <FormGroup>
                     <Label for="deviceTrigger">Devices:</Label>
                     <Input type="select" name="deviceTrigger" id="deviceTrigger">
-                    <option>Lifx</option>
+                    {/* <option>Lifx</option>
                     <option>Wemo</option>
                     <option>USB</option>
-                    <option>GPIO</option>
+                    <option>GPIO</option> */}
+                    {
+                    deviceData.map((i)=>{
+                        return(
+                            <option onSelect={()=>{setDeviceId(i.device_id)}}>
+                               {i.device_id}. {i.device_name}
+                            </option>
+                        )
+                    })
+                    }
                     </Input>
                 </FormGroup>
                 <FormGroup>
@@ -254,21 +295,23 @@ function ControlCenter(){
                     <Input type="text" name="actionInput" id="actionInput" placeholder="Action Input" />
                 </FormGroup>
                 <div>
-                    Preset List:
+                Preset List:
+                <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple onChange={(e)=>{setPresetSelection(e.target.value)}}>
                     {
                     presetData.map((i)=>{
                         return(
-                            <ul>
-                                <li>{i.preset_name}</li>
-                            </ul>
+                            <option>
+                               {i.preset_name}
+                            </option>
                         )
                     })
                     }  
+                </Input>
                 </div>
                 </Form>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={toggleTrigger}>Submit</Button>{' '}
+                <Button color="primary" onClick={()=>{triggerSubmit()}}>Submit</Button>{' '}
                 <Button color="danger" onClick={toggleTrigger}>Cancel</Button>
               </ModalFooter>
             </Modal>
