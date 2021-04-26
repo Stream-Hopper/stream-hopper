@@ -108,10 +108,10 @@ class EventDatabase {
     ///////////////////////////////////////
     /// TRIGGERS QUERIES
     ///////////////////////////////////////
-    triggers_INSERT(trigger_name, device_id, trigger_type, trigger_action_id, options,cb) {
+    triggers_INSERT(trigger_name, device_id, trigger_type_id, trigger_action_id, options,cb) {
         let sql = `INSERT INTO TRIGGERS VALUES(NULL,?,?,?,?,?);`;
 
-        this.db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options], function (err) {
+        this.db.run(sql, [trigger_name, device_id, trigger_type_id, trigger_action_id, options], function (err) {
             if (err) {
                 cb(err.message)
                 return console.log(err.message);
@@ -237,29 +237,35 @@ class EventDatabase {
         });
     }
 
-    listDeviceType() {
-        let sql = `SELECT device_type_id, device_type_name FROM DEVICE_TYPE;`;
-
+    listDeviceType(cb) {
+        let sql = `SELECT device_type_id, name FROM DEVICE_TYPE;`;
+        let data=[]
         this.db.all(sql, [], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 
-    listTriggerType() {
+    listTriggerType(cb) {
         let sql = `SELECT trigger_type_id, trigger_type_name FROM TRIGGER_TYPE;`;
-
+        let data=[]
         this.db.all(sql, [], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
     

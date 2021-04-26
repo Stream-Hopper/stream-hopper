@@ -307,9 +307,17 @@ export default async function API(){
       
       res.send(data)
     }
-    res.send(EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb))
+    EventDB.device_INSERT(req.body.deviceName,req.body.deviceLabel,req.body.deviceType,cb)
   });
-  app.get('/api/getActionsPerDevice', async (req, res) => {
+  app.get('/api/getDeviceType', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listDeviceType(cb)
+  });
+  app.post('/api/getActionsPerDevice', async (req, res) => {
     // EventDB.listDevices()
     const cb = function (data) {
       
@@ -343,13 +351,21 @@ export default async function API(){
     }
     EventDB.listTriggers(cb)
   });
-  app.post('/api/addTriggerss', async (req, res) => {
+  app.get('/api/getTriggerType', async (req, res) => {
     // EventDB.listDevices()
     const cb = function (data) {
       
       res.send(data)
     }
-    EventDB.triggers_INSERT(req.body.triggerName,req.body.triggerType,req.body.triggerActionId,req.body.options,cb)
+    EventDB.listTriggerType(cb)
+  });
+  app.post('/api/addTriggers', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.triggers_INSERT(req.body.triggerName,req.body.deviceId,req.body.triggerTypeId,req.body.triggerActionId,req.body.options,cb)
   });
 
 
