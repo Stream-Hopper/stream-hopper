@@ -19,7 +19,7 @@ function ControlCenter(){
     const [deviceTypeData,setDeviceTypeData] = useState([])
     const [actionsData,setActionsData] = useState([])
     const [deviceTypeSelction,setDeviceTypeSelction] = useState()
-    const [presetSelection,setPresetSelection] = useState()
+    const [presetSelection,setPresetSelection] = useState([])
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
@@ -54,6 +54,8 @@ function ControlCenter(){
             console.log(res,'RESPONSE PRESET')
             toggleTrigger()
         })
+
+        
     }
     
     function handleDeviceOnchange(e){
@@ -75,6 +77,19 @@ function ControlCenter(){
         setActionId(e.target.value.split('.')[0])
         console.log(e.target.value.split('.')[0],'ACTION ID SELECTION')
     }
+
+    function handlePresetSelection(e){
+        let ret = []
+        for (var i=0; i < e.options.length; i++) {
+            if (e.options[i].selected) {
+                ret.push(e.options[i].value);
+            }
+        }
+        setPresetSelection(ret)
+        console.log(ret,'FUUUUCKKCKCKCKCK')
+
+    }
+
 
    
     useEffect(() => {
@@ -366,7 +381,7 @@ function ControlCenter(){
                 </FormGroup>
                 <div>
                 Preset List:
-                <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple onChange={(e)=>{setPresetSelection(e.target.value)}}>
+                <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple onChange={(e)=>{handlePresetSelection(e.target)}}>
                     {
                     presetData.map((i)=>{
                         return(
