@@ -9,22 +9,71 @@ function ControlCenter(){
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
     const [deviceData, setDeviceData] = useState([])
+    const [deviceId,setDeviceId] = useState()
+    const [deviceTypeId, setDeviceTypeId] = useState()
+    const [triggerTypeId,setTriggerTypeId] = useState()
+    const [actionId,setActionId] = useState()
     const [presetData,setPresetData] = useState([])
     const [triggerData,setTriggerData] = useState([])
+    const [triggerTypeData,setTriggerTypeData] = useState([])
+    const [deviceTypeData,setDeviceTypeData] = useState([])
+    const [actionsData,setActionsData] = useState([])
     const [deviceTypeSelction,setDeviceTypeSelction] = useState()
+    const [presetSelection,setPresetSelection] = useState()
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
 
+    console.log(presetSelection,'THIS IS THE LIST')
+
 
     function deviceSubmit(){
-        axios.post("http://localhost:8080/api/addDevice",{deviceName: `${document.getElementById('deviceName').value}`, deviceLabel: `${document.getElementById('deviceLabel').value}`, deviceType: `${document.getElementById('deviceType').value}`})
+        axios.post("http://localhost:8080/api/addDevice",{deviceName: `${document.getElementById('deviceName').value}`, deviceLabel: `${document.getElementById('deviceLabel').value}`, deviceType: deviceTypeId})
         .then(res=>{
             console.log(res,'RESPONSE DEVICE')
-            // setDeviceData(res.data)
+            toggleDevice()
         })
 
-        toggleDevice()
+    }
+    function presetSubmit(){
+        axios.post("http://localhost:8080/api/addPresets",{presetName: `${document.getElementById('presetName').value}`, defaultPreset: document.getElementById("defaultPreset").checked? 1:0 })
+        .then(res=>{
+            console.log(res,'RESPONSE PRESET')
+            togglePreset()
+        })
+
+    }
+
+    function getActionsPerDevice(id){
+        axios.get()
+    }
+
+    function triggerSubmit(){
+        axios.post("http://localhost:8080/api/addTriggers",{triggerName: `${document.getElementById('triggerName').value}`, deviceId: deviceId, triggerTypeId: triggerTypeId, triggerActionId: actionId,options: `${document.getElementById('actionInput').value}`})
+        .then(res=>{
+            console.log(res,'RESPONSE PRESET')
+            toggleTrigger()
+        })
+    }
+    
+    function handleDeviceOnchange(e){
+        setDeviceId(e.target.value.split('.')[0])
+        console.log(e.target.value.split('.')[0],"TEST SELECTION")
+    }
+
+    function handleTriggerTypeOnchange(e){
+        setTriggerTypeId(e.target.value.split('.')[0])
+        console.log(e.target.value.split('.')[0],'TRIGGER TYPE ID')
+    }
+
+    function handleDeviceTypeOnChange(e){
+        setDeviceTypeId(e.target.value.split('.')[0])
+        console.log(e.target.value.split('.')[0],'DEVICE TYPE ID SELCTION')
+    }
+
+    function handleActionOnChange(e){
+        setActionId(e.target.value.split('.')[0])
+        console.log(e.target.value.split('.')[0],'ACTION ID SELECTION')
     }
 
    
@@ -42,7 +91,7 @@ function ControlCenter(){
             console.log(res.data,'PRESET LIST')
             setPresetData(res.data)
         })
-      },[]);
+      },[presetModal]);
 
       useEffect(() => {
         axios.get("http://localhost:8080/api/getTriggers")
@@ -50,7 +99,33 @@ function ControlCenter(){
             console.log(res.data,'TRIGGERS LIST')
             setTriggerData(res.data)
         })
+      },[triggerModal]);
+
+      useEffect(() => {
+        axios.post("http://localhost:8080/api/getActionsPerDevice",{id: deviceId})
+        .then(res=>{
+            console.log(res.data,'ACTIONS LIST')
+            setActionsData(res.data)
+        })
+      },[deviceId]);
+
+      useEffect(() => {
+        axios.get("http://localhost:8080/api/getTriggerType")
+        .then(res=>{
+            // console.log(res.data,'ACTIONS LIST')
+            setTriggerTypeData(res.data)
+        })
       },[]);
+
+      useEffect(() => {
+        axios.get("http://localhost:8080/api/getDeviceType")
+        .then(res=>{
+            console.log(res.data,'DEVICE TYPE LIST')
+            setDeviceTypeData(res.data)
+        })
+      },[]);
+
+
 
     return(
 
@@ -100,11 +175,20 @@ function ControlCenter(){
                 </FormGroup>
                 <FormGroup>
                     <Label for="deviceType">Device Type</Label>
-                    <Input type="select" name="deviceType" id="deviceType" onChange={(e)=>setDeviceTypeSelction(e.target.value)}>
-                    <option>Lifx</option>
+                    <Input type="select" name="deviceType" id="deviceType" onChange={(e)=>handleDeviceTypeOnChange(e)}>
+                    {/* <option>Lifx</option>
                     <option>Wemo</option>
                     <option>USB</option>
-                    <option>GPIO</option>
+                    <option>GPIO</option> */}
+                    {
+                        deviceTypeData.map((i)=>{
+                            return(
+                                <option>
+                                    {i.device_type_id}. {i.name}
+                                </option>
+                            )
+                        })
+                    }
                     </Input>
                 </FormGroup>
                 </Form>
@@ -161,14 +245,14 @@ function ControlCenter(){
                 </div>
                 <FormGroup check>
                     <Label check>
-                    <Input type="checkbox" />{' '}
+                    <Input type="checkbox" id="defaultPreset"/>{' '}
                     Default
                     </Label>
                 </FormGroup>
                 </Form>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={togglePreset}>Submit</Button>{' '}
+                <Button color="primary" onClick={()=>{presetSubmit()}}>Submit</Button>{' '}
                 <Button color="danger" onClick={togglePreset}>Cancel</Button>
               </ModalFooter>
             </Modal>
@@ -215,29 +299,47 @@ function ControlCenter(){
                 </FormGroup>
                 <FormGroup>
                     <Label for="deviceTrigger">Devices:</Label>
-                    <Input type="select" name="deviceTrigger" id="deviceTrigger">
-                    <option>Lifx</option>
+                    <Input type="select" name="deviceTrigger" id="deviceTrigger" onChange={(e)=>{handleDeviceOnchange(e)}}>
+                    {/* <option>Lifx</option>
                     <option>Wemo</option>
                     <option>USB</option>
-                    <option>GPIO</option>
+                    <option>GPIO</option> */}
+                    {
+                    deviceData.map((i)=>{
+                        return(
+                            <option onSelect={()=>{setDeviceId(i.device_id)}}>
+                               {i.device_id}. {i.device_name}
+                            </option>
+                        )
+                    })
+                    }
                     </Input>
                 </FormGroup>
                 <FormGroup>
                     <Label for="triggerType">Trigger Type:</Label>
-                    <Input type="select" name="triggerType" id="TriggerType">
-                    <option>Donation</option>
+                    <Input type="select" name="triggerType" id="TriggerType" onChange={(e)=>{handleTriggerTypeOnchange(e)}}>
+                    {/* <option>Donation</option>
                     <option>Follow</option>
                     <option>Channel Point Redemption</option>
                     <option>Subscription</option>
                     <option>Cheer</option>
                     <option>Chat Message</option>
-                    <option>Resub</option>
+                    <option>Resub</option> */}
+                    {
+                        triggerTypeData.map((i)=>{
+                            return(
+                                <option>
+                                {i.trigger_type_id}. {i.trigger_type_name}
+                                </option>
+                            )
+                        })
+                    }
                     </Input>
                 </FormGroup>
                 <FormGroup>
                     <Label for="actions">Actions(Static for now):</Label>
-                    <Input type="select" name="actions" id="action">
-                    <option>setSate</option>
+                    <Input type="select" name="actions" id="action" onChange={(e)=>{handleActionOnChange(e)}}>
+                    {/* <option>setSate</option>
                     <option>togglePower</option>
                     <option>breatheEffect</option>
                     <option>WemoOn</option>
@@ -246,7 +348,16 @@ function ControlCenter(){
                     <option>USBon</option>
                     <option>USBoff</option>
                     <option>GPIOon</option>
-                    <option>GPIOoff</option>
+                    <option>GPIOoff</option> */}
+                    {
+                        actionsData.map((i)=>{
+                            return(
+                                <option>
+                                    {i.trigger_action_id}. {i.action}
+                                </option>
+                            )
+                        })
+                    }
                     </Input>
                 </FormGroup>
                 <FormGroup>
@@ -254,21 +365,23 @@ function ControlCenter(){
                     <Input type="text" name="actionInput" id="actionInput" placeholder="Action Input" />
                 </FormGroup>
                 <div>
-                    Preset List:
+                Preset List:
+                <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple onChange={(e)=>{setPresetSelection(e.target.value)}}>
                     {
                     presetData.map((i)=>{
                         return(
-                            <ul>
-                                <li>{i.preset_name}</li>
-                            </ul>
+                            <option>
+                               {i.preset_name}
+                            </option>
                         )
                     })
                     }  
+                </Input>
                 </div>
                 </Form>
               </ModalBody>
               <ModalFooter>
-                <Button color="primary" onClick={toggleTrigger}>Submit</Button>{' '}
+                <Button color="primary" onClick={()=>{triggerSubmit()}}>Submit</Button>{' '}
                 <Button color="danger" onClick={toggleTrigger}>Cancel</Button>
               </ModalFooter>
             </Modal>
