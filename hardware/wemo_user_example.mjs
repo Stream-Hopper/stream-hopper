@@ -1,4 +1,12 @@
-import {set_wemo_on, set_wemo_off, state_of_wemo} from './wemo_actions.mjs';
-let wemo1 = 'Wemo Mini';
+import { WEMOAPI } from './wemo_actions.mjs';
 
-set_wemo_off(wemo1);
+let wemo = new WEMOAPI("StreamHopper1");
+wemo.set_wemo_off();
+
+setTimeout(function() {
+    wemo.set_wemo_on();
+}, 3000);
+
+setTimeout(function() {
+    wemo.state_of_wemo();
+}, 5000);
