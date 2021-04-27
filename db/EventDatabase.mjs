@@ -299,6 +299,32 @@ class EventDatabase {
         });
     }
 
+    findIdForName(trigger_name) {
+        let sql = `SELECT trigger_id FROM TRIGGERS WHERE trigger_name = ?;`;
+
+        this.db.all(sql, [trigger_name], (err, rows) => {
+            if (err) {
+                throw err;
+            }
+            rows.forEach((row) => {
+                console.log(row);
+            });
+        });
+    }
+
+    listTriggersPerPreset(preset_id) {
+        let sql = `SELECT trigger_id FROM PRESET_2_TRIGGER_MAP WHERE preset_id = ?;`;
+
+        this.db.all(sql, [preset_id], (err, rows) => {
+            if (err) {
+                throw err;
+            }
+            rows.forEach((row) => {
+                console.log(row);
+            });
+        });
+    }
+
     create_database() {
         this.db.serialize(() => {
             this.db.exec("PRAGMA foreign_keys = off\;" +
