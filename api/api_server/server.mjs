@@ -10,6 +10,7 @@ import TwitchAPI from '../twitch_api.js';
 import { LIFXAPI } from '../../hardware/lifxapi.mjs';
 import { WEMOAPI } from '../../hardware/wemo_actions.mjs'
 import { GPIOAPI } from '../../hardware/GPIOAPI.mjs';
+import { USBAPI } from '../../hardware/usb.mjs';
 const app = express();
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -35,12 +36,8 @@ const twitchAccessToken = '29qqic0xdts63hqz85ejlwvcfvt034';
 const twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
 const twitchRefreshToken = 'uwq0krupsxw63a1lovgxxsdcz7g7uccirhxhy1hqr0o5w6cem1';
 const twitchDevUsername = 'Stream_Hoppers';
-//const twitchChannelUsername = userData[0].twitch_channel_username;
-//const twitchUserID = userData[0].twitch_channel_id;
 const twitchChannelUsername = 'Stream_Hoppers';
 const twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
-// const twitchChannelUsername = 'xqcow';
-// const twitchUserID = '71092938';
 
 // Create the Database instance
 var userDatabase = new Database.Database('./db.sqlite');
@@ -325,6 +322,7 @@ async function getUserID(username, clientID){
     }
     EventDB.listActionsPerDevice(req.body.id,cb)
   });
+
   // PRESET ENDPOINTS
   app.get('/api/getpresets', async (req, res) => {
     // EventDB.listDevices()
@@ -412,18 +410,17 @@ class Event_Handler {
     if (apiMessage.type in triggerDict) {
       triggerDict[apiMessage.type].forEach(function (trigger, index) {
         switch(trigger.triggerType) {
-          case 'setState':      LIFXAPIClient.setState(deviceName, power, color, brightness=null, duration=null, infared=null, fast=null); break;
-          case 'togglePower':   LIFXAPIClient.togglePower(deviceName, duration=null); break;
-          case 'breatheEffect': LIFXAPIClient.breatheEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null, peak=null); break;
-          case 'moveEffect':    LIFXAPIClient.moveEffect(deviceName, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
-          case 'pulseEffect':   LIFXAPIClient.pulseEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
-          // these need to be updated to accept the hardware backend functions
-          case 'wemoOn':        WEMOAPIClient.set_wemo_on(name); break;
-          case 'wemoOff':       WEMOAPIClient.set_wemo_off(name); break;
-          // case 'usbOn':         LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
-          // case 'usbOff':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
-          case 'gpioOn':        GPIOAPIClient.toggle(portNumber, 1); break;
-          case 'gpioOff':       GPIOAPIClient.toggle(portNumber, 0); break;
+          case 'setState':      LIFXAPIClient.setState(trigger.deviceName, trigger.power, trigger.color, brightness=null, duration=null, infared=null, fast=null); break;
+          case 'togglePower':   LIFXAPIClient.togglePower(trigger.deviceName, duration=null); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.deviceName, trigger.color, from_color=null, period=null, cycles=null, persist=null, power_on=null, peak=null); break;
+          case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.deviceName, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
+          case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.deviceName, trigger.color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
+          case 'wemoOn':        WEMOAPIClient.set_wemo_on(trigger.name); break;
+          case 'wemoOff':       WEMOAPIClient.set_wemo_off(trigger.name); break;
+          case 'usbOn':         USBAPIClient.turnOnUSBPorts(); break;
+          case 'usbOff':        USBAPIClient.turnOffUSBPorts(); break;
+          case 'gpioOn':        GPIOAPIClient.toggle(trigger.portNumber, 1); break;
+          case 'gpioOff':       GPIOAPIClient.toggle(trigger.portNumber, 0); break;
         }
       });
     }
@@ -435,12 +432,16 @@ const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08
 const LIFXAPIClient = new LIFXAPI(apiToken);
 const WEMOAPIClient = new WEMOAPI();
 const GPIOAPIClient = new GPIOAPI();
-WEMOAPIClient.set_wemo_off("Wemo Mini");
-//const USBAPIClient = new USBAPI();
-// await USBAPIClient.init();
-// await USBAPIClient.turnOffUSBPorts();
+const USBAPIClient = new USBAPI();
+await USBAPIClient.init();
 await LIFXAPIClient.init();
-//LIFXAPIClient.pulseEffect('Backlight', '#0000ff');
+
+// init the event handler
 const event_handler = new Event_Handler();
+
+// start the Event Subscription API
 event_handler.twitchClient.startEventSubs();
-event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
+
+// Test donation
+//event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
+WEMOAPIClient.set_wemo_on("Streamhopper");
