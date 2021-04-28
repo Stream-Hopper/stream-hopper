@@ -361,7 +361,6 @@ export default async function API(){
       res.send(data)
     }
     EventDB.listTriggerType(cb)
-    console.log(triggerDict);
   });
   app.post('/api/addTriggers', async (req, res) => {
     // EventDB.listDevices()
@@ -453,6 +452,5 @@ class Event_Handler {
 }
 
 const event_handler = new Event_Handler();
-axios.get('http://localhost:8080/api/getTriggerType');
 event_handler.twitchClient.startEventSubs();
 event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
