@@ -371,6 +371,53 @@ export default async function API(){
     EventDB.triggers_INSERT(req.body.triggerName,req.body.deviceId,req.body.triggerTypeId,req.body.triggerActionId,req.body.options,cb)
   });
 
+  app.post('/api/getTriggersPerPreset', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listTriggersPerPreset(req.body.presetId,cb)
+  });
+
+  app.post('/api/getTriggerIdForName', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.findIdForName(req.body.triggerName,cb)
+  });
+
+  app.post('/api/triggerPresetMap', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.P2TMAP_INSERT(req.body.triggerId,req.body.presetId,cb)
+  });
+
+  app.post('/api/triggerDictPerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.dictFormatTrigger(req.body.triggerId,cb)
+  });
+
+  app.post('/api/receiveDict', async (req, res) => {
+    // EventDB.listDevices()
+    // console.log(req.body.triggerDict,"THIS IS OUR DICTIONARY")
+    triggerDict = req.body.triggerDict
+    console.log(triggerDict,'IN ORDER')
+    res.send('GOT IT')
+    
+  });
+
+
+
 
   // Close the server gracefully 
   process.on('SIGTERM', () => {

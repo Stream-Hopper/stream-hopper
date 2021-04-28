@@ -149,13 +149,15 @@ class EventDatabase {
     ///////////////////////////////////////
     /// PRESET_2_TRIGGER_MAP QUERIES
     ///////////////////////////////////////
-    P2TMAP_INSERT(trigger_id, preset_id) {
+    P2TMAP_INSERT(trigger_id, preset_id,cb) {
         let sql = `INSERT INTO PRESET_2_TRIGGER_MAP VALUES(NULL,?,?);`;
-
+        // let data=[]
         this.db.run(sql, [preset_id, trigger_id], function (err) {
             if (err) {
+                cb(err)
                 return console.log(err.message);
             }
+            cb('MAPPING DONE')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -238,7 +240,7 @@ class EventDatabase {
     }
 
     listDeviceType(cb) {
-        let sql = `SELECT device_type_id, name FROM DEVICE_TYPE;`;
+        let sql = `SELECT device_type_id, device_type_name FROM DEVICE_TYPE;`;
         let data=[]
         this.db.all(sql, [], (err, rows) => {
             if (err) {
@@ -299,44 +301,54 @@ class EventDatabase {
         });
     }
 
-    findIdForName(trigger_name) {
+    findIdForName(trigger_name,cb) {
         let sql = `SELECT trigger_id FROM TRIGGERS WHERE trigger_name = ?;`;
+        let data=[]
 
         this.db.all(sql, [trigger_name], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 
-    listTriggersPerPreset(preset_id) {
+    listTriggersPerPreset(preset_id,cb) {
         let sql = `SELECT trigger_id FROM PRESET_2_TRIGGER_MAP WHERE preset_id = ?;`;
-
+        let data = []
         this.db.all(sql, [preset_id], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 
-    dictFormatTrigger(trigger_id) {
+    dictFormatTrigger(trigger_id,cb) {
         let sql = `SELECT t.trigger_id, t.trigger_name, d.device_name, d.device_label, ta.action,tt.trigger_type_name, t.options  
                     FROM TRIGGERS t,DEVICES d,TRIGGER_ACTIONS ta,TRIGGER_TYPE tt 
                     WHERE trigger_id=? AND t.device_id=d.device_id AND t.trigger_type=tt.trigger_type_id AND t.trigger_action_id=ta.trigger_action_id;`;
-
+        let data = []
         this.db.all(sql, [trigger_id], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 

@@ -5,6 +5,8 @@ import axios from 'axios'
 
 function ControlCenter(){
 
+    var triggerDict = {}
+
     const [deviceModal,setDeviceModal] = useState(false)
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
@@ -14,6 +16,7 @@ function ControlCenter(){
     const [triggerTypeId,setTriggerTypeId] = useState()
     const [actionId,setActionId] = useState()
     const [triggerId,setTriggerId] = useState()
+    const [triggerList,setTriggerList] = useState([])
     const [presetData,setPresetData] = useState([])
     const [triggerData,setTriggerData] = useState([])
     const [triggerTypeData,setTriggerTypeData] = useState([])
@@ -108,9 +111,37 @@ function ControlCenter(){
         axios.post("http://localhost:8080/api/getTriggersPerPreset",{presetId: `${e.innerHTML.split('.')[0]}`})
         .then(res=>{
             console.log(res.data,'TRIGGERS LIST FOR EACH PRESET')
+            setTriggerList(res.data)
         })
     }
 
+    useEffect(()=>{
+        console.log(triggerList,'YOU GETTING IT')
+        triggerList.forEach(trigger =>{
+        axios.post("http://localhost:8080/api/triggerDictPerId",{triggerId: trigger.trigger_id})
+        .then(res=>{
+            // console.log(res.data[0],'FUCKING DICTIONARY')
+            triggerDict[res.data[0].trigger_type_name].push(res.data[0])
+            console.log(triggerDict,'DICTIONARY')
+        })
+
+        axios.post("http://localhost:8080/api/receiveDict",{triggerDict: triggerDict})
+        .then(res=>{
+            console.log(res.data)
+        })
+        })
+    },[triggerList])
+
+    useEffect(()=>{
+        // triggerDict = Object();
+        triggerDict['donation'] = [];
+        triggerDict['follow'] = [];
+        triggerDict['channelPointRedemption'] = [];
+        triggerDict['subscription'] = [];
+        triggerDict['cheer'] = [];
+        triggerDict['chatMessage'] = [];
+        triggerDict['resub'] = [];
+    })
 
    
     useEffect(() => {
@@ -230,7 +261,7 @@ function ControlCenter(){
                         deviceTypeData.map((i)=>{
                             return(
                                 <option>
-                                    {i.device_type_id}. {i.name}
+                                    {i.device_type_id}. {i.device_type_name}
                                 </option>
                             )
                         })
