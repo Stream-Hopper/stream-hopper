@@ -2,7 +2,7 @@ import StreamLabsAPI from './api/streamlabs_api.js';
 import TwitchAPI from './api/twitch_api.js';
 import API from './api/api_server/server.mjs';
 import { LIFXAPI } from './hardware/lifxapi.mjs';
-//import { WEMOAPI } from './hardware/lifxapi.mjs'
+import { WEMOAPI } from './hardware/wemo_actions.mjs'
 import fetch from 'node-fetch';
 import axios from 'axios';
 await API();
@@ -69,10 +69,13 @@ class Event_Handler {
   constructor() {
     // dictionary to hold set triggers by GUI
     globalThis.triggerDict = Object();
-    // temporarily load dummy info into dict
-    globalThis.triggerDict['chatMessage'] = [{ triggerId: 0, triggerName: 'On Chat Message pulse',triggerType: 0, options: '#0000FF' }];
-    globalThis.triggerDict['chatMessage'].push({ triggerId: 1, triggerName: 'On Chat Message set color',triggerType: 1, options: '#FF0000' })
-    console.log(this.triggerDict);
+    globalThis.triggerDict['donation'] = [];
+    globalThis.triggerDict['follow'] = [];
+    globalThis.triggerDict['channelPointRedemption'] = [];
+    globalThis.triggerDict['subscription'] = [];
+    globalThis.triggerDict['cheer'] = [];
+    globalThis.triggerDict['chatMessage'] = [];
+    globalThis.triggerDict['resub'] = [];
 
     // Create API Objects
     this.streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, this.findEventMatch);
@@ -85,11 +88,19 @@ class Event_Handler {
   findEventMatch(apiMessage) {
     if (apiMessage.type in globalThis.triggerDict) {
       globalThis.triggerDict[apiMessage.type].forEach(function (trigger, index) {
-        // this will need to be based off trigger type once we get that far into development
         switch(trigger.triggerType) {
-          // case will need to be made for each trigger_type
-          case 0: LIFXAPIClient.pulseEffect('Backlight', trigger.options); break;
-          case 1: LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          case 'setState':      LIFXAPIClient.setState(deviceName, power, color, brightness=null, duration=null, infared=null, fast=null); break;
+          case 'togglePower':   LIFXAPIClient.togglePower(deviceName, duration=null); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null, peak=null); break;
+          case 'moveEffect':    LIFXAPIClient.moveEffect(deviceName, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
+          case 'pulseEffect':   LIFXAPIClient.pulseEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
+          // these need to be updated to accept the hardware backend functions
+          // case 'wemoOn':        set_wemo_on(name); break;
+          // case 'wemoOff':       set_wemo_off(name); break;
+          // case 'usbOn':         LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          // case 'usbOff':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          // case 'gpioOn':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          // case 'gpioOff':       LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
         }
       });
     }
