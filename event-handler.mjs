@@ -53,6 +53,7 @@ const twitchUserID = '650937654';
 // Hardware Layer Instantiations
 const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08c1';
 const LIFXAPIClient = new LIFXAPI(apiToken);
+const WEMOAPIClient = new WEMOAPI();
 //const USBAPIClient = new USBAPI();
 // await USBAPIClient.init();
 // await USBAPIClient.turnOffUSBPorts();
@@ -95,8 +96,8 @@ class Event_Handler {
           case 'moveEffect':    LIFXAPIClient.moveEffect(deviceName, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
           case 'pulseEffect':   LIFXAPIClient.pulseEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
           // these need to be updated to accept the hardware backend functions
-          // case 'wemoOn':        set_wemo_on(name); break;
-          // case 'wemoOff':       set_wemo_off(name); break;
+          case 'wemoOn':        WEMOAPIClient.set_wemo_on(name); break;
+          case 'wemoOff':       WEMOAPIClient.set_wemo_off(name); break;
           // case 'usbOn':         LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
           // case 'usbOff':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
           // case 'gpioOn':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;

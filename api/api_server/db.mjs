@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3/lib/sqlite3.js';
+import sqlite3 from 'sqlite3';
 import fetch from 'node-fetch';
 
 const sql = sqlite3.verbose();
