@@ -38,7 +38,7 @@ const twitchDevUsername = 'Stream_Hoppers';
 //const twitchChannelUsername = userData[0].twitch_channel_username;
 //const twitchUserID = userData[0].twitch_channel_id;
 const twitchChannelUsername = 'Stream_Hoppers';
-const twitchUserID = '650937654';
+const twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
 // const twitchChannelUsername = 'xqcow';
 // const twitchUserID = '71092938';
 
@@ -71,9 +71,6 @@ async function getUserID(username, clientID){
   return userID;
 }
 
-
-// API Endpoints
-export default async function API(){
   const server = app.listen(port, () => {
     console.log(`API listening at http://localhost:${port}`)
   })
@@ -386,24 +383,6 @@ export default async function API(){
     process.exit(0);
   });
 
-  return app;
-}
-
-
-await API();
-
-
-// Hardware Layer Instantiations
-const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08c1';
-const LIFXAPIClient = new LIFXAPI(apiToken);
-const WEMOAPIClient = new WEMOAPI();
-const GPIOAPIClient = new GPIOAPI();
-WEMOAPIClient.set_wemo_off("Wemo Mini");
-//const USBAPIClient = new USBAPI();
-// await USBAPIClient.init();
-// await USBAPIClient.turnOffUSBPorts();
-await LIFXAPIClient.init();
-//LIFXAPIClient.pulseEffect('Backlight', '#0000ff');
 
 //|////////////////////////////////////////////////
 //  Definitions
@@ -451,6 +430,17 @@ class Event_Handler {
   }
 }
 
+// Hardware Layer Instantiations
+const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08c1';
+const LIFXAPIClient = new LIFXAPI(apiToken);
+const WEMOAPIClient = new WEMOAPI();
+const GPIOAPIClient = new GPIOAPI();
+WEMOAPIClient.set_wemo_off("Wemo Mini");
+//const USBAPIClient = new USBAPI();
+// await USBAPIClient.init();
+// await USBAPIClient.turnOffUSBPorts();
+await LIFXAPIClient.init();
+//LIFXAPIClient.pulseEffect('Backlight', '#0000ff');
 const event_handler = new Event_Handler();
 event_handler.twitchClient.startEventSubs();
 event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
