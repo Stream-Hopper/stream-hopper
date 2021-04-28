@@ -8,5 +8,4 @@ class GPIOAPI{
     }
 }
 
-const gpio = new GPIOAPI();
-gpio.toggle(1, 1);
+export { GPIOAPI }

@@ -2,30 +2,45 @@ import fetch from 'node-fetch';
 import express from 'express';
 import Database from './db.mjs';
 import bodyParser from 'body-parser';
-import cors from 'cors'
-import EventDatabase from './../../db/EventDatabase.mjs'
+import cors from 'cors';
+import axios from 'axios';
+import EventDatabase from '../../db/EventDatabase.mjs';
+import StreamLabsAPI from '../streamlabs_api.js';
+import TwitchAPI from '../twitch_api.js';
+import { LIFXAPI } from '../../hardware/lifxapi.mjs';
+import { WEMOAPI } from '../../hardware/wemo_actions.mjs'
+import { GPIOAPI } from '../../hardware/GPIOAPI.mjs';
 const app = express();
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const port = 8080
 
-// All our important information... this will be stored in the database
-const twitchScopes = "user_read+user_blocks_edit+user_blocks_read+user_follows_edit+channel_read+channel_editor+channel_commercial+channel_stream+channel_subscriptions+user_subscriptions+channel_check_subscription+channel_feed_read+channel_feed_edit+collections_edit+communities_edit+communities_moderate+viewing_activity_read+openid+analytics:read:extensions+user:edit+user:read:email+clips:edit+bits:read+analytics:read:games+user:edit:broadcast+user:read:broadcast+chat:read+chat:edit+channel:moderate+channel:read:subscriptions+whispers:read+whispers:edit+moderation:read+channel:read:redemptions+channel:edit:commercial+channel:read:hype_train+channel:read:stream_key+channel:manage:extensions+channel:manage:broadcast+user:edit:follows+channel:manage:redemptions+channel:read:editors+channel:manage:videos+user:read:blocked_users+user:manage:blocked_users+user:read:subscriptions";
-const twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
+var triggerDict = {};
+
+// StreamLabs Tokens
+// Tokens for the bot in use - will eventually get these from GUI and save them securely
 const streamlabsClientID = 'lzEr0OVv9OWUqm8vW7QWO4B5XigrQc0dxFcLvrLk';
 const streamlabsClientSecret = 'mBNuOyyOQgysLOHzkZVnQO8iPtxdg58KKGSB4boY';
-const streamlabsScopes = 'donations.read+donations.create+alerts.create+legacy.token+socket.token+alerts.write+credits.write+profiles.write+jar.write+wheel.write+mediashare.control';
+const streamlabsAccessToken = '4rh6uxzo34r2rsKQqTPOipVPL9CqL69eQltYoo8V';
 const streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
+const streamlabsRefreshToken = 'NZQ6Xbt81eJehfkCNA7XsMICDLG9Kh6yMaGQupL5';
+const streamlabsUri = 'http://localhost:3000';
+
+// Twitch Tokens
+// Bot tokens and such
+// These should be changed to the StreamHopper's credentials (obviously)
+const twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
+const twitchAccessToken = '29qqic0xdts63hqz85ejlwvcfvt034';
 const twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
-const twitchRedirectURI = 'http://localhost:3000';
-const streamlabsRedirectURI = 'http://localhost:3000';
-
-// We will get this value from the user in the GUI
-var twitchChannelUsername = null;
-
-// This will be called by the GUI ultimately but its here for testing purposes
-var twitchUserID = null;
+const twitchRefreshToken = 'uwq0krupsxw63a1lovgxxsdcz7g7uccirhxhy1hqr0o5w6cem1';
+const twitchDevUsername = 'Stream_Hoppers';
+//const twitchChannelUsername = userData[0].twitch_channel_username;
+//const twitchUserID = userData[0].twitch_channel_id;
+const twitchChannelUsername = 'Stream_Hoppers';
+const twitchUserID = '650937654';
+// const twitchChannelUsername = 'xqcow';
+// const twitchUserID = '71092938';
 
 // Create the Database instance
 var userDatabase = new Database.Database('./db.sqlite');
@@ -280,18 +295,6 @@ export default async function API(){
     }
   });
 
-  app.post('/api/updateUsername', async (req, res) => {
-    let username = req.body.username;
-    let id = await getUserID(username, twitchClientID);
-    if(id == -1){
-      res.send({status: "failed", error: 'Invalid Twitch Name'});
-    }else{
-      twitchChannelUsername = username;
-      twitchUserID = id;
-      userDatabase.editData({twitch_channel_username: username, twitch_channel_id: id});
-      res.send({status: "success"});
-    }
-  });
   // DEVICE ENDPOINTS
   app.get('/api/getDevices', async (req, res) => {
     // EventDB.listDevices()
@@ -358,6 +361,7 @@ export default async function API(){
       res.send(data)
     }
     EventDB.listTriggerType(cb)
+    console.log(triggerDict);
   });
   app.post('/api/addTriggers', async (req, res) => {
     // EventDB.listDevices()
@@ -385,3 +389,70 @@ export default async function API(){
 
   return app;
 }
+
+
+await API();
+
+
+// Hardware Layer Instantiations
+const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08c1';
+const LIFXAPIClient = new LIFXAPI(apiToken);
+const WEMOAPIClient = new WEMOAPI();
+const GPIOAPIClient = new GPIOAPI();
+WEMOAPIClient.set_wemo_off("Wemo Mini");
+//const USBAPIClient = new USBAPI();
+// await USBAPIClient.init();
+// await USBAPIClient.turnOffUSBPorts();
+await LIFXAPIClient.init();
+//LIFXAPIClient.pulseEffect('Backlight', '#0000ff');
+
+//|////////////////////////////////////////////////
+//  Definitions
+//|////////////////////////////////////////////////
+class Event_Handler {
+  //  Function Definitions
+  constructor() {
+    // dictionary to hold set triggers by GUI
+    triggerDict = Object();
+    triggerDict['donation'] = [];
+    triggerDict['follow'] = [];
+    triggerDict['channelPointRedemption'] = [];
+    triggerDict['subscription'] = [];
+    triggerDict['cheer'] = [];
+    triggerDict['chatMessage'] = [];
+    triggerDict['resub'] = [];
+
+    // Create API Objects
+    this.streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, this.findEventMatch);
+    this.twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, this.findEventMatch);
+  }
+
+  /* Incoming API message is matched to triggers set
+   * by the GUI, then sends triggers based off matches
+   */
+  findEventMatch(apiMessage) {
+    if (apiMessage.type in triggerDict) {
+      triggerDict[apiMessage.type].forEach(function (trigger, index) {
+        switch(trigger.triggerType) {
+          case 'setState':      LIFXAPIClient.setState(deviceName, power, color, brightness=null, duration=null, infared=null, fast=null); break;
+          case 'togglePower':   LIFXAPIClient.togglePower(deviceName, duration=null); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null, peak=null); break;
+          case 'moveEffect':    LIFXAPIClient.moveEffect(deviceName, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
+          case 'pulseEffect':   LIFXAPIClient.pulseEffect(deviceName, color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
+          // these need to be updated to accept the hardware backend functions
+          case 'wemoOn':        WEMOAPIClient.set_wemo_on(name); break;
+          case 'wemoOff':       WEMOAPIClient.set_wemo_off(name); break;
+          // case 'usbOn':         LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          // case 'usbOff':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          case 'gpioOn':        GPIOAPIClient.toggle(portNumber, 1); break;
+          case 'gpioOff':       GPIOAPIClient.toggle(portNumber, 0); break;
+        }
+      });
+    }
+  }
+}
+
+const event_handler = new Event_Handler();
+axios.get('http://localhost:8080/api/getTriggerType');
+event_handler.twitchClient.startEventSubs();
+event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
