@@ -17,6 +17,7 @@ class WEMOAPI {
 	set_wemo_off(){
 		var wemo_name = this.name;
 		Wemo.Search(this.name, function(err,device){
+            console.log(device)
 			var wemoSwitch = new Wemo(device.ip, device.port);
 			wemoSwitch.setBinaryState(0, function(err,result){
 				if(err) console.error(err);

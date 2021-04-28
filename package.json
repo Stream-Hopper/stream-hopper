@@ -30,6 +30,7 @@
     "twitch": "^4.5.5",
     "twitch-eventsub": "^4.5.5",
     "twitch-eventsub-ngrok": "^4.5.5",
-    "wemo": "^0.2.1"
+    "wemo": "^0.2.1",
+    "wemo-client": "^0.15.0"
   }
 }

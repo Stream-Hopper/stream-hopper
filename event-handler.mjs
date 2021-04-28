@@ -3,6 +3,7 @@ import TwitchAPI from './api/twitch_api.js';
 import API from './api/api_server/server.mjs';
 import { LIFXAPI } from './hardware/lifxapi.mjs';
 import { WEMOAPI } from './hardware/wemo_actions.mjs'
+import { GPIOAPI } from './hardware/GPIOAPI.mjs';
 import fetch from 'node-fetch';
 import axios from 'axios';
 await API();
@@ -54,6 +55,8 @@ const twitchUserID = '650937654';
 const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08c1';
 const LIFXAPIClient = new LIFXAPI(apiToken);
 const WEMOAPIClient = new WEMOAPI();
+const GPIOAPIClient = new GPIOAPI();
+WEMOAPIClient.set_wemo_off("Wemo Mini");
 //const USBAPIClient = new USBAPI();
 // await USBAPIClient.init();
 // await USBAPIClient.turnOffUSBPorts();
@@ -100,8 +103,8 @@ class Event_Handler {
           case 'wemoOff':       WEMOAPIClient.set_wemo_off(name); break;
           // case 'usbOn':         LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
           // case 'usbOff':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
-          // case 'gpioOn':        LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
-          // case 'gpioOff':       LIFXAPIClient.pulseEffect('Lightbulb', trigger.options); break;
+          case 'gpioOn':        GPIOAPIClient.toggle(portNumber, 1); break;
+          case 'gpioOff':       GPIOAPIClient.toggle(portNumber, 0); break;
         }
       });
     }
