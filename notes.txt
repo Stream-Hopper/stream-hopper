@@ -1,0 +1,6 @@
+need to have a trigger type for each type device type and options
+    lifx - set color
+    lifx - breathe
+    lifx - pulse
+    ...
+    wemo - off
