@@ -13,6 +13,7 @@ function ControlCenter(){
     const [deviceTypeId, setDeviceTypeId] = useState()
     const [triggerTypeId,setTriggerTypeId] = useState()
     const [actionId,setActionId] = useState()
+    const [triggerId,setTriggerId] = useState()
     const [presetData,setPresetData] = useState([])
     const [triggerData,setTriggerData] = useState([])
     const [triggerTypeData,setTriggerTypeData] = useState([])
@@ -44,19 +45,31 @@ function ControlCenter(){
 
     }
 
-    function getActionsPerDevice(id){
-        axios.get()
-    }
+    // function getActionsPerDevice(id){
+    //     axios.get()
+    // }
 
     function triggerSubmit(){
         axios.post("http://localhost:8080/api/addTriggers",{triggerName: `${document.getElementById('triggerName').value}`, deviceId: deviceId, triggerTypeId: triggerTypeId, triggerActionId: actionId,options: `${document.getElementById('actionInput').value}`})
         .then(res=>{
-            console.log(res,'RESPONSE PRESET')
+            console.log(res.data,'RESPONSE TRIGGER SUBMIT')
             toggleTrigger()
         })
 
+        axios.post("http://localhost:8080/api/getTriggerIdForName",{triggerName: `${document.getElementById('triggerName').value}`})
+        .then(res=>{
+            console.log(res.data[0].trigger_id,'RESPONSE ID FOR TRIGGER')
+            let triggerId= res.data[0].trigger_id
+            setTriggerId(triggerId)
+            // helperFunction(triggerId)
+            // toggleTrigger()
+        })
+
+        // console.log(`${document.getElementById('triggerName').value}`,'BULLSHIT')
+
         
     }
+
     
     function handleDeviceOnchange(e){
         setDeviceId(e.target.value.split('.')[0])
@@ -82,12 +95,20 @@ function ControlCenter(){
         let ret = []
         for (var i=0; i < e.options.length; i++) {
             if (e.options[i].selected) {
-                ret.push(e.options[i].value);
+                ret.push(e.options[i].value.split('.')[0]);
             }
         }
         setPresetSelection(ret)
         console.log(ret,'FUUUUCKKCKCKCKCK')
 
+    }
+
+    function handlePresetClick(e){
+        console.log(e.innerHTML.split('.')[0],"THIS SHIT IS CLICKED")
+        axios.post("http://localhost:8080/api/getTriggersPerPreset",{presetId: `${e.innerHTML.split('.')[0]}`})
+        .then(res=>{
+            console.log(res.data,'TRIGGERS LIST FOR EACH PRESET')
+        })
     }
 
 
@@ -139,6 +160,16 @@ function ControlCenter(){
             setDeviceTypeData(res.data)
         })
       },[]);
+
+      useEffect(()=>{
+        for(let i=0; i<presetSelection.length;i++){
+            axios.post("http://localhost:8080/api/triggerPresetMap",{triggerId: triggerId,presetId: presetSelection[i]})
+            .then(res=>{
+                console.log(res.data,"MAPPING CONFIRMED")
+            })
+            // console.log(triggerId,'CRAPPPPP')
+        }
+      },[triggerId])
 
 
 
@@ -217,7 +248,7 @@ function ControlCenter(){
            </div> 
            {/* Preset table */}
            <div style={{width:"30%",display:"inline-block",margin:"10px"}}>
-           <Table bordered>
+           <Table bordered hover>
                 <thead>
                     <tr>
                     <th>Presets</th>
@@ -237,7 +268,7 @@ function ControlCenter(){
                     presetData.map((i)=>{
                         return(
                             <tr>
-                                <td>{i.preset_name}</td>
+                                <td onClick={(e)=>{handlePresetClick(e.target)}}>{i.preset_id}. {i.preset_name}</td>
                             </tr>
                         )
                     })
@@ -386,7 +417,7 @@ function ControlCenter(){
                     presetData.map((i)=>{
                         return(
                             <option>
-                               {i.preset_name}
+                               {i.preset_id}. {i.preset_name}
                             </option>
                         )
                     })
