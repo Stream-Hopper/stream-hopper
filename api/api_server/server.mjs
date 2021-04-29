@@ -284,10 +284,10 @@ async function getUserID(username, clientID){
   // Used by the Streamlabs API for donation alert audio 
   app.get('/audio/:filename', (req, res) => {
     if (process.platform == 'win32'){
-      res.sendFile(_dirname + `\\api_server\\sounds\\${req.params.filename}`);
+      res.sendFile(process.cwd() + `\\api\\api_server\\sounds\\${req.params.filename}`);
     }else{
       //res.sendFile(_dirname + `/api_server/sounds/${req.params.filename}`);
-      res.sendFile(`/home/pi/stream-hopper/api/api_server/sounds/${req.params.filename}`);
+      res.sendFile(process.cwd() + `/api/api_server/sounds/${req.params.filename}`);
     }
   });
 
@@ -495,4 +495,4 @@ let twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitc
 twitchClient.startEventSubs();
 
 // Test donation
-streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
+streamlabsAPIClient.donationAlert('tedcruz-mistake.mp3');
