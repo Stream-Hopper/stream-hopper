@@ -2,7 +2,6 @@ import fetch from 'node-fetch';
 import express from 'express';
 import Database from './db.mjs';
 import bodyParser from 'body-parser';
-import fs from 'fs';
 import cors from 'cors';
 import axios from 'axios';
 import EventDatabase from '../../db/EventDatabase.mjs';
@@ -284,10 +283,9 @@ async function getUserID(username, clientID){
   // Used by the Streamlabs API for donation alert audio 
   app.get('/audio/:filename', (req, res) => {
     if (process.platform == 'win32'){
-      res.sendFile(_dirname + `\\api_server\\sounds\\${req.params.filename}`);
+      res.sendFile(process.cwd() + `\\api_server\\sounds\\${req.params.filename}`);
     }else{
-      //res.sendFile(_dirname + `/api_server/sounds/${req.params.filename}`);
-      res.sendFile(`/home/pi/stream-hopper/api/api_server/sounds/${req.params.filename}`);
+      res.sendFile(process.cwd() + `/api_server/sounds/${req.params.filename}`);
     }
   });
 
@@ -407,8 +405,7 @@ async function getUserID(username, clientID){
   app.post('/api/receiveDict', async (req, res) => {
     // EventDB.listDevices()
     // console.log(req.body.triggerDict,"THIS IS OUR DICTIONARY")
-    console.log(req.body.triggerArray, 'incoming arrray')
-    triggerDict = req.body.triggerArray
+    triggerDict = req.body.triggerDict
     console.log(triggerDict,'IN ORDER')
     res.send('GOT IT')
     
@@ -448,6 +445,9 @@ class Event_Handler {
     triggerDict['chatMessage'] = [];
     triggerDict['resub'] = [];
 
+    // Create API Objects
+    this.streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, this.findEventMatch);
+    this.twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, this.findEventMatch);
   }
 
   /* Incoming API message is matched to triggers set
@@ -456,14 +456,12 @@ class Event_Handler {
   findEventMatch(apiMessage) {
     if (apiMessage.type in triggerDict) {
       triggerDict[apiMessage.type].forEach(function (trigger, index) {
-          console.log(trigger.trigger_type_name)
-        switch(trigger.action) {
-          case 'setState':      LIFXAPIClient.setState(trigger.device_label, 'on', trigger.options); break;
-          case 'togglePower':   LIFXAPIClient.togglePower(trigger.device_label); break;
-          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.device_label, trigger.options, "#000000", 1, 10);
-                streamlabsAPIClient.donationAlert('im-kind-of-retarded-alex-jones.mp3'); break;
-          case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.device_label); break;
-          case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.device_label, trigger.options, "#000000", 1, 10); break;
+        switch(trigger.triggerType) {
+          case 'setState':      LIFXAPIClient.setState(trigger.device_label, 'On', trigger.options, brightness=null, duration=null, infared=null, fast=null); break;
+          case 'togglePower':   LIFXAPIClient.togglePower(trigger.device_label, duration=null); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.device_label, trigger.color, from_color=null, period=null, cycles=null, persist=null, power_on=null, peak=null); break;
+          case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.device_label, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
+          case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.device_label, trigger.color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
           case 'wemoOn':        WEMOAPIClient.set_wemo_on(trigger.device_label); break;
           case 'wemoOff':       WEMOAPIClient.set_wemo_off(trigger.device_label); break;
           case 'usbOn':         USBAPIClient.turnOnUSBPorts(); break;
@@ -487,12 +485,9 @@ await LIFXAPIClient.init();
 
 // init the event handler
 const event_handler = new Event_Handler();
-    // Create API Objects
-let streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, event_handler.findEventMatch);
-let twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, event_handler.findEventMatch);
 
 // start the Event Subscription API
-twitchClient.startEventSubs();
+event_handler.twitchClient.startEventSubs();
 
 // Test donation
-streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
+//event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");

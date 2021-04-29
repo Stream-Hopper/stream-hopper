@@ -5,8 +5,6 @@ import axios from 'axios'
 
 function ControlCenter(){
 
-    var triggerDict = {}
-
     const [deviceModal,setDeviceModal] = useState(false)
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
@@ -70,10 +68,10 @@ function ControlCenter(){
 
         // console.log(`${document.getElementById('triggerName').value}`,'BULLSHIT')
 
-        
+
     }
 
-    
+
     function handleDeviceOnchange(e){
         setDeviceId(e.target.value.split('.')[0])
         console.log(e.target.value.split('.')[0],"TEST SELECTION")
@@ -117,23 +115,7 @@ function ControlCenter(){
 
     useEffect(()=>{
         console.log(triggerList,'YOU GETTING IT')
-        triggerList.forEach(trigger =>{
-        axios.post("http://localhost:8080/api/triggerDictPerId",{triggerId: trigger.trigger_id})
-        .then(res=>{
-            // console.log(res.data[0],'FUCKING DICTIONARY')
-            triggerDict[res.data[0].trigger_type_name].push(res.data[0])
-            console.log(triggerDict,'DICTIONARY')
-        })
-
-        axios.post("http://localhost:8080/api/receiveDict",{triggerDict: triggerDict})
-        .then(res=>{
-            console.log(res.data)
-        })
-        })
-    },[triggerList])
-
-    useEffect(()=>{
-        // triggerDict = Object();
+        let triggerDict = Object();
         triggerDict['donation'] = [];
         triggerDict['follow'] = [];
         triggerDict['channelPointRedemption'] = [];
@@ -141,9 +123,34 @@ function ControlCenter(){
         triggerDict['cheer'] = [];
         triggerDict['chatMessage'] = [];
         triggerDict['resub'] = [];
-    })
+        triggerList.forEach(trigger =>{
+        axios.post("http://localhost:8080/api/triggerDictPerId",{triggerId: trigger.trigger_id})
+        .then(res=>{
+            // console.log(res.data[0],'FUCKING DICTIONARY')
+            triggerDict[res.data[0].trigger_type_name].push(res.data[0])
+            console.log(triggerDict,'DICTIONARY')
 
-   
+            axios.post("http://localhost:8080/api/receiveDict",{triggerArray: triggerDict})
+            .then(res=>{
+                console.log(res.data)
+            })
+        })
+
+        })
+    },[triggerList])
+
+    useEffect(()=>{
+        let triggerDict = Object();
+        triggerDict['donation'] = [];
+        triggerDict['follow'] = [];
+        triggerDict['channelPointRedemption'] = [];
+        triggerDict['subscription'] = [];
+        triggerDict['cheer'] = [];
+        triggerDict['chatMessage'] = [];
+        triggerDict['resub'] = [];
+    },[])
+
+
     useEffect(() => {
         axios.get("http://localhost:8080/api/getDevices")
         .then(res=>{
@@ -276,7 +283,7 @@ function ControlCenter(){
                 <Button color="danger" onClick={toggleDevice}>Cancel</Button>
               </ModalFooter>
             </Modal>
-           </div> 
+           </div>
            {/* Preset table */}
            <div style={{width:"30%",display:"inline-block",margin:"10px"}}>
            <Table bordered hover>
@@ -303,7 +310,7 @@ function ControlCenter(){
                             </tr>
                         )
                     })
-                    }   
+                    }
                     <tr>
                     <td><button onClick={()=>{setPresetModal(true)}}>Add a Preset</button></td>
                     </tr>
@@ -360,7 +367,7 @@ function ControlCenter(){
                             </tr>
                         )
                     })
-                     }      
+                     }
                     <tr>
                     <td><button onClick={()=>{toggleTrigger()}}>Add a Trigger</button></td>
                     </tr>
@@ -452,7 +459,7 @@ function ControlCenter(){
                             </option>
                         )
                     })
-                    }  
+                    }
                 </Input>
                 </div>
                 </Form>
