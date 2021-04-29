@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import express from 'express';
 import Database from './db.mjs';
 import bodyParser from 'body-parser';
+import fs from 'fs';
 import cors from 'cors';
 import axios from 'axios';
 import EventDatabase from '../../db/EventDatabase.mjs';
@@ -283,9 +284,10 @@ async function getUserID(username, clientID){
   // Used by the Streamlabs API for donation alert audio 
   app.get('/audio/:filename', (req, res) => {
     if (process.platform == 'win32'){
-      res.sendFile(process.cwd() + `\\api_server\\sounds\\${req.params.filename}`);
+      res.sendFile(process.cwd() + `\\api\\api_server\\sounds\\${req.params.filename}`);
     }else{
-      res.sendFile(process.cwd() + `/api_server/sounds/${req.params.filename}`);
+      //res.sendFile(_dirname + `/api_server/sounds/${req.params.filename}`);
+      res.sendFile(process.cwd() + `/api/api_server/sounds/${req.params.filename}`);
     }
   });
 
@@ -323,6 +325,17 @@ async function getUserID(username, clientID){
     EventDB.listActionsPerDevice(req.body.id,cb)
   });
 
+  app.post('/api/deleteDevice', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.device_DELETE(req.body.deviceId,cb)
+  });
+
+
+
   // PRESET ENDPOINTS
   app.get('/api/getpresets', async (req, res) => {
     // EventDB.listDevices()
@@ -339,6 +352,14 @@ async function getUserID(username, clientID){
       res.send(data)
     }
     EventDB.presets_INSERT(req.body.presetName,req.body.defaultPreset,cb)
+  });
+  app.post('/api/deletePreset', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.presets_DELETE(req.body.presetId,cb)
   });
   // TRIGGER ENDPOINTS
   app.get('/api/getTriggers', async (req, res) => {
@@ -384,6 +405,24 @@ async function getUserID(username, clientID){
     EventDB.findIdForName(req.body.triggerName,cb)
   });
 
+  app.post('/api/deleteTrigger', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.triggers_DELETE(req.body.triggerId,cb)
+  });
+
+  app.post('/api/presetPerTrigger', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listPresetsPerTrigger(req.body.triggerId,cb)
+  });
+
   app.post('/api/triggerPresetMap', async (req, res) => {
     // EventDB.listDevices()
     const cb = function (data) {
@@ -392,6 +431,15 @@ async function getUserID(username, clientID){
     }
     EventDB.P2TMAP_INSERT(req.body.triggerId,req.body.presetId,cb)
   });
+  app.post('/api/triggerPresetMapDelete', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.P2TMAP_DELETE(req.body.presetId,req.body.triggerId,cb)
+  });
+
 
   app.post('/api/triggerDictPerId', async (req, res) => {
     // EventDB.listDevices()
@@ -405,7 +453,8 @@ async function getUserID(username, clientID){
   app.post('/api/receiveDict', async (req, res) => {
     // EventDB.listDevices()
     // console.log(req.body.triggerDict,"THIS IS OUR DICTIONARY")
-    triggerDict = req.body.triggerDict
+    console.log(req.body.triggerArray, 'incoming arrray')
+    triggerDict = req.body.triggerArray
     console.log(triggerDict,'IN ORDER')
     res.send('GOT IT')
     
@@ -445,9 +494,6 @@ class Event_Handler {
     triggerDict['chatMessage'] = [];
     triggerDict['resub'] = [];
 
-    // Create API Objects
-    this.streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, this.findEventMatch);
-    this.twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, this.findEventMatch);
   }
 
   /* Incoming API message is matched to triggers set
@@ -456,18 +502,20 @@ class Event_Handler {
   findEventMatch(apiMessage) {
     if (apiMessage.type in triggerDict) {
       triggerDict[apiMessage.type].forEach(function (trigger, index) {
-        switch(trigger.triggerType) {
-          case 'setState':      LIFXAPIClient.setState(trigger.deviceName, trigger.power, trigger.color, brightness=null, duration=null, infared=null, fast=null); break;
-          case 'togglePower':   LIFXAPIClient.togglePower(trigger.deviceName, duration=null); break;
-          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.deviceName, trigger.color, from_color=null, period=null, cycles=null, persist=null, power_on=null, peak=null); break;
-          case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.deviceName, direction=null, period=null, cycles=null, power_on=null, fast=null); break;
-          case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.deviceName, trigger.color, from_color=null, period=null, cycles=null, persist=null, power_on=null); break;
-          case 'wemoOn':        WEMOAPIClient.set_wemo_on(trigger.name); break;
-          case 'wemoOff':       WEMOAPIClient.set_wemo_off(trigger.name); break;
+          console.log(trigger.trigger_type_name)
+        switch(trigger.action) {
+          case 'setState':      LIFXAPIClient.setState(trigger.device_label, 'on', trigger.options); break;
+          case 'togglePower':   LIFXAPIClient.togglePower(trigger.device_label); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.device_label, trigger.options, "#000000", 1, 10);
+                streamlabsAPIClient.donationAlert('im-kind-of-retarded-alex-jones.mp3'); break;
+          case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.device_label); break;
+          case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.device_label, trigger.options, "#000000", 1, 10); break;
+          case 'wemoOn':        WEMOAPIClient.set_wemo_on(trigger.device_label); break;
+          case 'wemoOff':       WEMOAPIClient.set_wemo_off(trigger.device_label); break;
           case 'usbOn':         USBAPIClient.turnOnUSBPorts(); break;
           case 'usbOff':        USBAPIClient.turnOffUSBPorts(); break;
-          case 'gpioOn':        GPIOAPIClient.toggle(trigger.portNumber, 1); break;
-          case 'gpioOff':       GPIOAPIClient.toggle(trigger.portNumber, 0); break;
+          case 'gpioOn':        GPIOAPIClient.toggle(trigger.device_label, 1); break;
+          case 'gpioOff':       GPIOAPIClient.toggle(trigger.device_label, 0); break;
         }
       });
     }
@@ -485,10 +533,12 @@ await LIFXAPIClient.init();
 
 // init the event handler
 const event_handler = new Event_Handler();
+    // Create API Objects
+let streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, event_handler.findEventMatch);
+let twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, event_handler.findEventMatch);
 
 // start the Event Subscription API
-event_handler.twitchClient.startEventSubs();
+twitchClient.startEventSubs();
 
 // Test donation
-//event_handler.streamlabsAPIClient.postDonation('Test', 1337, 13.37, "USD");
-WEMOAPIClient.set_wemo_on("Streamhopper");
+streamlabsAPIClient.donationAlert('tedcruz-mistake.mp3');

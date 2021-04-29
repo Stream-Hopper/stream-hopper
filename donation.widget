@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "css": "body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; overflow: hidden; }",
+    "fps": 30,
+    "fps_custom": false,
+    "height": 600,
+    "reroute_audio": false,
+    "restart_when_active": false,
+    "shutdown": true,
+    "url": "",
+    "width": 800
+  },
+  "name": "DonationAlert",
+  "type": 0,
+  "x": 0.38372093023255816,
+  "y": 0,
+  "scaleX": 0.00029069767441860465,
+  "scaleY": 0.0006944444444444445
+}

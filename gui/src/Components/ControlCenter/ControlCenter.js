@@ -5,8 +5,6 @@ import axios from 'axios'
 
 function ControlCenter(){
 
-    var triggerDict = {}
-
     const [deviceModal,setDeviceModal] = useState(false)
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
@@ -16,6 +14,9 @@ function ControlCenter(){
     const [triggerTypeId,setTriggerTypeId] = useState()
     const [actionId,setActionId] = useState()
     const [triggerId,setTriggerId] = useState()
+    const [refreshDevice,setRefreshDevice] = useState(true)
+    const [refreshPreset,setRefreshPreset] = useState(true)
+    const [refreshTrigger,setRefreshTrigger] = useState(true)
     const [triggerList,setTriggerList] = useState([])
     const [presetData,setPresetData] = useState([])
     const [triggerData,setTriggerData] = useState([])
@@ -70,10 +71,10 @@ function ControlCenter(){
 
         // console.log(`${document.getElementById('triggerName').value}`,'BULLSHIT')
 
-        
+
     }
 
-    
+
     function handleDeviceOnchange(e){
         setDeviceId(e.target.value.split('.')[0])
         console.log(e.target.value.split('.')[0],"TEST SELECTION")
@@ -112,28 +113,62 @@ function ControlCenter(){
         .then(res=>{
             console.log(res.data,'TRIGGERS LIST FOR EACH PRESET')
             setTriggerList(res.data)
+            let presetItems = document.getElementsByClassName('presetItem')
+            for(let i =0; i < presetItems.length; i++){
+                presetItems[i].style.backgroundColor = 'white'
+            }
+            e.style.backgroundColor = 'gray'
         })
+    }
+
+    function handleDeviceDelete(i){
+        console.log(i,'BUTTON IS CLICKED')
+        axios.post("http://localhost:8080/api/deleteDevice",{deviceId: i})
+        .then(res=>{
+            // console.log(res.data,'TRIGGERS LIST FOR EACH PRESET')
+            // setTriggerList(res.data)
+            console.log(res.data,'Delete Response')
+            setRefreshDevice(!refreshDevice)
+        })
+    }
+
+    function handlePresetDelete(e,i){
+        e.stopPropagation()
+        axios.post("http://localhost:8080/api/deletePreset",{presetId: i})
+        .then(res=>{
+            // console.log(res.data,'TRIGGERS LIST FOR EACH PRESET')
+            // setTriggerList(res.data)
+            console.log(res.data,'Delete Response')
+            setRefreshPreset(!refreshPreset)
+        })
+    }
+
+    function hadnleTriggerDelete(i){
+
+        axios.post("http://localhost:8080/api/deleteTrigger",{triggerId: i})
+        .then(res=>{
+            // console.log(res.data,'TRIGGERS LIST FOR EACH PRESET')
+            // setTriggerList(res.data)
+            console.log(res.data,'Delete Response')
+            setRefreshTrigger(!refreshTrigger)
+        })
+
+        axios.post("http://localhost:8080/api/presetPerTrigger",{triggerId: i})
+        .then(res=>{
+            console.log(res.data,'PRESETS FOR TRIGGERS')
+            res.data.forEach(item=>{
+                axios.post("http://localhost:8080/api/triggerPresetMapDelete",{triggerId: i,presetId: item.preset_id})
+                .then(res=>{
+                    // console.log(res.data,"MAPPING CONFIRMED")
+                })
+            })
+        })
+
     }
 
     useEffect(()=>{
         console.log(triggerList,'YOU GETTING IT')
-        triggerList.forEach(trigger =>{
-        axios.post("http://localhost:8080/api/triggerDictPerId",{triggerId: trigger.trigger_id})
-        .then(res=>{
-            // console.log(res.data[0],'FUCKING DICTIONARY')
-            triggerDict[res.data[0].trigger_type_name].push(res.data[0])
-            console.log(triggerDict,'DICTIONARY')
-        })
-
-        axios.post("http://localhost:8080/api/receiveDict",{triggerDict: triggerDict})
-        .then(res=>{
-            console.log(res.data)
-        })
-        })
-    },[triggerList])
-
-    useEffect(()=>{
-        // triggerDict = Object();
+        let triggerDict = Object();
         triggerDict['donation'] = [];
         triggerDict['follow'] = [];
         triggerDict['channelPointRedemption'] = [];
@@ -141,16 +176,41 @@ function ControlCenter(){
         triggerDict['cheer'] = [];
         triggerDict['chatMessage'] = [];
         triggerDict['resub'] = [];
-    })
+        triggerList.forEach(trigger =>{
+        axios.post("http://localhost:8080/api/triggerDictPerId",{triggerId: trigger.trigger_id})
+        .then(res=>{
+            // console.log(res.data[0],'FUCKING DICTIONARY')
+            triggerDict[res.data[0].trigger_type_name].push(res.data[0])
+            console.log(triggerDict,'DICTIONARY')
 
-   
+            axios.post("http://localhost:8080/api/receiveDict",{triggerArray: triggerDict})
+            .then(res=>{
+                console.log(res.data)
+            })
+        })
+
+        })
+    },[triggerList])
+
+    // useEffect(()=>{
+    //     let triggerDict = Object();
+    //     triggerDict['donation'] = [];
+    //     triggerDict['follow'] = [];
+    //     triggerDict['channelPointRedemption'] = [];
+    //     triggerDict['subscription'] = [];
+    //     triggerDict['cheer'] = [];
+    //     triggerDict['chatMessage'] = [];
+    //     triggerDict['resub'] = [];
+    // },[])
+
+
     useEffect(() => {
         axios.get("http://localhost:8080/api/getDevices")
         .then(res=>{
             console.log(res.data,'DEVICE LIST')
             setDeviceData(res.data)
         })
-      },[deviceModal]);
+      },[deviceModal,refreshDevice]);
 
       useEffect(() => {
         axios.get("http://localhost:8080/api/getPresets")
@@ -158,7 +218,7 @@ function ControlCenter(){
             console.log(res.data,'PRESET LIST')
             setPresetData(res.data)
         })
-      },[presetModal]);
+      },[presetModal,refreshPreset]);
 
       useEffect(() => {
         axios.get("http://localhost:8080/api/getTriggers")
@@ -166,7 +226,7 @@ function ControlCenter(){
             console.log(res.data,'TRIGGERS LIST')
             setTriggerData(res.data)
         })
-      },[triggerModal]);
+      },[triggerModal,refreshTrigger]);
 
       useEffect(() => {
         axios.post("http://localhost:8080/api/getActionsPerDevice",{id: deviceId})
@@ -228,7 +288,9 @@ function ControlCenter(){
                     deviceData.map((i)=>{
                         return(
                             <tr>
-                                <td>{i.device_name}</td>
+                                <td>{i.device_id}. {i.device_name}
+                                <button type="button" class="close material-icons delete" aria-label="Close" onClick={()=>{handleDeviceDelete(i.device_id)}}>&#xE5C9;</button>
+                                </td>
                             </tr>
                         )
                     })
@@ -276,7 +338,7 @@ function ControlCenter(){
                 <Button color="danger" onClick={toggleDevice}>Cancel</Button>
               </ModalFooter>
             </Modal>
-           </div> 
+           </div>
            {/* Preset table */}
            <div style={{width:"30%",display:"inline-block",margin:"10px"}}>
            <Table bordered hover>
@@ -299,11 +361,14 @@ function ControlCenter(){
                     presetData.map((i)=>{
                         return(
                             <tr>
-                                <td onClick={(e)=>{handlePresetClick(e.target)}}>{i.preset_id}. {i.preset_name}</td>
+                                <td className="presetItem" onClick={(e)=>{handlePresetClick(e.target)}}>{i.preset_id}. {i.preset_name}
+                                
+                                <button type="button" class="close material-icons delete" aria-label="Close" onClick={(e)=>{handlePresetDelete(e,i.preset_id)}}>&#xE5C9;</button>
+                                </td>
                             </tr>
                         )
                     })
-                    }   
+                    }
                     <tr>
                     <td><button onClick={()=>{setPresetModal(true)}}>Add a Preset</button></td>
                     </tr>
@@ -356,11 +421,13 @@ function ControlCenter(){
                     triggerData.map((i)=>{
                         return(
                             <tr>
-                                <td>{i.trigger_name}</td>
+                                <td>{i.trigger_name}
+                                <button type="button" class="close material-icons delete" aria-label="Close" onClick={()=>{hadnleTriggerDelete(i.trigger_id)}}>&#xE5C9;</button>
+                                </td>
                             </tr>
                         )
                     })
-                     }      
+                     }
                     <tr>
                     <td><button onClick={()=>{toggleTrigger()}}>Add a Trigger</button></td>
                     </tr>
@@ -452,7 +519,7 @@ function ControlCenter(){
                             </option>
                         )
                     })
-                    }  
+                    }
                 </Input>
                 </div>
                 </Form>

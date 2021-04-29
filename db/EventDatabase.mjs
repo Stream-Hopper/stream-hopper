@@ -52,13 +52,15 @@ class EventDatabase {
         });
     }
 
-    device_DELETE(device_id) {
+    device_DELETE(device_id,cb) {
         let sql = `DELETE FROM DEVICES WHERE device_id=?;`;
 
         this.db.run(sql, [device_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('Good Riddance')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -93,13 +95,15 @@ class EventDatabase {
         });
     }
 
-    presets_DELETE(preset_id) {
+    presets_DELETE(preset_id,cb) {
         let sql = `DELETE FROM PRESETS WHERE preset_id=?;`;
 
         this.db.run(sql, [preset_id], function (err) {
             if (err) {
+                cb(err)
                 return console.log(err.message);
             }
+            cb('GOOD RIDDANCE')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -134,13 +138,15 @@ class EventDatabase {
         });
     }
 
-    triggers_DELETE(trigger_id) {
+    triggers_DELETE(trigger_id,cb) {
         let sql = `DELETE FROM TRIGGERS WHERE trigger_id=?;`;
 
         this.db.run(sql, [trigger_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb("GOOD RIDDANCE")
             // get the last insert id
             //.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -175,13 +181,15 @@ class EventDatabase {
         });
     }
 
-    P2TMAP_DELETE(preset_id, trigger_id) {
+    P2TMAP_DELETE(preset_id, trigger_id,cb) {
         let sql = `DELETE FROM PRESET_2_TRIGGER_MAP WHERE preset_id=? AND trigger_id=?;`;
 
         this.db.run(sql, [preset_id, trigger_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('GOOD RIDDANCE')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -288,18 +296,38 @@ class EventDatabase {
         });
     }
 
-    listPresetsPerTrigger(trigger_id) {
-        let sql = `SELECT preset_id, preset_name FROM PRESETS WHERE preset_id = (SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?);`;
-
+    listPresetsPerTrigger(trigger_id,cb) {
+        let sql = `SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?;`;
+        let data = []
         this.db.all(sql, [trigger_id], (err, rows) => {
             if (err) {
+                cd(Error)
                 throw err;
+
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
+    // listPresetsPerTrigger(trigger_id,cb) {
+    //     let sql = `SELECT preset_id, preset_name FROM PRESETS WHERE preset_id = (SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?);`;
+    //     let data = []
+    //     this.db.all(sql, [trigger_id], (err, rows) => {
+    //         if (err) {
+    //             cd(Error)
+    //             throw err;
+
+    //         }
+    //         rows.forEach((row) => {
+    //             console.log(row);
+    //             data.push(row)
+    //         });
+    //         cb(data)
+    //     });
+    // }
 
     findIdForName(trigger_name,cb) {
         let sql = `SELECT trigger_id FROM TRIGGERS WHERE trigger_name = ?;`;

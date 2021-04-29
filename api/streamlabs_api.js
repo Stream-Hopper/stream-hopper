@@ -41,19 +41,19 @@ class StreamLabsAPI {
     params.append('voice', 'Brian');
     params.append('text', ttsText);
 
-    const options = { 
-        method: 'POST', 
+    const options = {
+        method: 'POST',
         body: params
     };
 
     // Send POST request
     let url = fetch(baseUrl, options)
         .then(res => res.json())
-        .then(json => { 
-          return json.speak_url; 
+        .then(json => {
+          return json.speak_url;
         })
         .catch(err => console.error('error:' + err));
-    
+
     return url;
   }
 
@@ -61,7 +61,7 @@ class StreamLabsAPI {
     let url = await this.getTTSURL(ttsText);
     var baseUrl = 'https://streamlabs.com/api/v1.0/alerts';
     var params = new URLSearchParams();
-  
+
     // Add all parameters - there are more parameters but these are the required ones
     // Maybe later we can make this better and have defaults and such (make this a function
     // and have option params where we intelligently decide what params to add based on
@@ -72,40 +72,42 @@ class StreamLabsAPI {
     params.append('message', ' ');
     params.append('user_message', ' ');
     params.append('sound_href', url);
-  
-    const options = { 
-      method: 'POST', 
+
+    const options = {
+      method: 'POST',
       body: params
     };
-  
+
     // Send the POST request
     fetch(baseUrl, options)
       .then(res => res.json())
       .then(json => console.log(json))
       .catch(err => console.error('error:' + err));
   }
-  
+
   // Trigger custom donation alert... pass any audio filename to this and that's it
   // Also the webserver needs to be running in api/audio_server for this to work
   donationAlert(filename){
     // Check if audio file used for alert is present in "sounds" directory
     if (isWindowsOS()){
       var audioFilePath = __dirname + `\\api_server\\sounds\\${filename}`;
+        console.log(audioFilePath)
       if (!fs.existsSync(audioFilePath)){
         console.log(`Audio File Path Doesn\'t Exist\nAdd desired audio file to the \"${__dirname + '\\audio_server\\sounds'}\" folder...`, );
         return;
       }
     }else{
       var audioFilePath = __dirname + `/api_server/sounds/${filename}`;
+        console.log(audioFilePath)
       if (!fs.existsSync(audioFilePath)){
         console.log(`Audio File Path Doesn\'t Exist\nAdd desired audio file to the \"${__dirname + '/audio_server/sounds'}\" folder...`, );
         return;
       }
     }
-  
+
     var baseUrl = 'https://streamlabs.com/api/v1.0/alerts';
     var params = new URLSearchParams();
-  
+
     // Add all parameters - there are more parameters but these are the required ones
     // Maybe later we can make this better and have defaults and such (make this a function
     // and have option params where we intelligently decide what params to add based on
@@ -115,12 +117,12 @@ class StreamLabsAPI {
     params.append('message', ' ');
     params.append('user_message', ' ');
     params.append('sound_href', `http://localhost:8080/audio/${filename}`);
-  
-    const options = { 
-      method: 'POST', 
+
+    const options = {
+      method: 'POST',
       body: params
     };
-  
+
     // Send the POST request
     fetch(baseUrl, options)
       .then(res => res.json())
@@ -133,19 +135,19 @@ class StreamLabsAPI {
 
     var baseUrl = 'https://streamlabs.com/api/v1.0/donations';
     var params = new URLSearchParams();
-    
+
     // Add params - make this better too
     params.append('name', name);
     params.append('identifier', identifier);
     params.append('amount', amount);
     params.append('currency', currency);
     params.append('access_token', this.accessToken);
-  
-    const options = { 
-      method: 'POST', 
+
+    const options = {
+      method: 'POST',
       body: params
     };
-  
+
     // Send POST request
     fetch(baseUrl, options)
       .then(res => res.json())
