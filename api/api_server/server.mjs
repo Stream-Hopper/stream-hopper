@@ -28,6 +28,7 @@ const streamlabsAccessToken = '4rh6uxzo34r2rsKQqTPOipVPL9CqL69eQltYoo8V';
 const streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
 const streamlabsRefreshToken = 'NZQ6Xbt81eJehfkCNA7XsMICDLG9Kh6yMaGQupL5';
 const streamlabsUri = 'http://localhost:3000';
+const streamlabsRedirectURI = 'http://localhost:3000'
 
 // Twitch Tokens
 // Bot tokens and such
@@ -39,6 +40,7 @@ const twitchRefreshToken = 'uwq0krupsxw63a1lovgxxsdcz7g7uccirhxhy1hqr0o5w6cem1';
 const twitchDevUsername = 'Stream_Hoppers';
 const twitchChannelUsername = 'Stream_Hoppers';
 const twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
+const twitchRedirectURI = 'http://localhost:3000'
 
 // Create the Database instance
 var userDatabase = new Database.Database('./db.sqlite');
