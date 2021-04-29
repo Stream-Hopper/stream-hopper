@@ -9,7 +9,6 @@ function ControlCenter(){
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
     const [deviceData, setDeviceData] = useState([])
-    const [deviceId,setDeviceId] = useState()
     const [deviceTypeId, setDeviceTypeId] = useState()
     const [triggerTypeId,setTriggerTypeId] = useState()
     const [actionId,setActionId] = useState()
@@ -19,6 +18,7 @@ function ControlCenter(){
     const [refreshTrigger,setRefreshTrigger] = useState(true)
     const [triggerList,setTriggerList] = useState([])
     const [presetData,setPresetData] = useState([])
+    const [deviceId,setDeviceId] = useState()
     const [triggerData,setTriggerData] = useState([])
     const [triggerTypeData,setTriggerTypeData] = useState([])
     const [deviceTypeData,setDeviceTypeData] = useState([])
@@ -30,6 +30,8 @@ function ControlCenter(){
     const toggleTrigger = () => setTriggerModal(!triggerModal);
 
     console.log(presetSelection,'THIS IS THE LIST')
+
+    // console.log(deviceTypeData[0].device_type_id,'MY LOG')
 
 
     function deviceSubmit(){
@@ -120,7 +122,7 @@ function ControlCenter(){
             e.style.backgroundColor = 'gray'
         })
     }
-
+    
     function handleDeviceDelete(i){
         console.log(i,'BUTTON IS CLICKED')
         axios.post("http://localhost:8080/api/deleteDevice",{deviceId: i})
@@ -191,24 +193,25 @@ function ControlCenter(){
 
         })
     },[triggerList])
-
+    
     // useEffect(()=>{
-    //     let triggerDict = Object();
-    //     triggerDict['donation'] = [];
-    //     triggerDict['follow'] = [];
-    //     triggerDict['channelPointRedemption'] = [];
-    //     triggerDict['subscription'] = [];
-    //     triggerDict['cheer'] = [];
-    //     triggerDict['chatMessage'] = [];
+        //     let triggerDict = Object();
+        //     triggerDict['donation'] = [];
+        //     triggerDict['follow'] = [];
+        //     triggerDict['channelPointRedemption'] = [];
+        //     triggerDict['subscription'] = [];
+        //     triggerDict['cheer'] = [];
+        //     triggerDict['chatMessage'] = [];
     //     triggerDict['resub'] = [];
     // },[])
-
+    
 
     useEffect(() => {
         axios.get("http://localhost:8080/api/getDevices")
         .then(res=>{
             console.log(res.data,'DEVICE LIST')
             setDeviceData(res.data)
+            setDeviceId(res.data[0].device_id)
         })
       },[deviceModal,refreshDevice]);
 
@@ -233,6 +236,7 @@ function ControlCenter(){
         .then(res=>{
             console.log(res.data,'ACTIONS LIST')
             setActionsData(res.data)
+            setActionId(res.data[0].trigger_action_id)
         })
       },[deviceId]);
 
@@ -241,16 +245,22 @@ function ControlCenter(){
         .then(res=>{
             // console.log(res.data,'ACTIONS LIST')
             setTriggerTypeData(res.data)
+            setTriggerTypeId(res.data[0].trigger_type_id)
         })
       },[]);
 
       useEffect(() => {
+
         axios.get("http://localhost:8080/api/getDeviceType")
         .then(res=>{
-            console.log(res.data,'DEVICE TYPE LIST')
+            // console.log(res.data,'DEVICE TYPE LIST')
             setDeviceTypeData(res.data)
+            setDeviceTypeId(res.data[0].device_type_id)
+            // console.log(res.data[0],'WTF')
         })
+        // console.log(deviceTypeData,'WTF')
       },[]);
+
 
       useEffect(()=>{
         for(let i=0; i<presetSelection.length;i++){
@@ -314,12 +324,12 @@ function ControlCenter(){
                 </FormGroup>
                 <FormGroup>
                     <Label for="deviceType">Device Type</Label>
-                    <Input type="select" name="deviceType" id="deviceType" onChange={(e)=>handleDeviceTypeOnChange(e)}>
+                    <Input type="select" name="deviceType" id="deviceType"  onChange={(e)=>handleDeviceTypeOnChange(e)}>
                     {/* <option>Lifx</option>
                     <option>Wemo</option>
                     <option>USB</option>
                     <option>GPIO</option> */}
-                    {
+                    { 
                         deviceTypeData.map((i)=>{
                             return(
                                 <option>
