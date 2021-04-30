@@ -495,6 +495,14 @@ async function getUserID(username, clientID){
     }
     EventDB.P2TMAP_DELETE(req.body.presetId,req.body.triggerId,cb)
   });
+  app.post('/api/triggerMapDelete', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.P2TMAP_DELETE_TRIGGER(req.body.triggerId,cb)
+  });
 
 
   app.post('/api/triggerDictPerId', async (req, res) => {
