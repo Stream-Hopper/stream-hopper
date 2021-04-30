@@ -8,10 +8,12 @@ function ControlCenter(){
     const [deviceModal,setDeviceModal] = useState(false)
     const [deviceEditModal,setDeviceEditModal] = useState(false)
     const [presetModal,setPresetModal] = useState(false)
+    const [presetEditModal,setPresetEditModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
     const [deviceData, setDeviceData] = useState([])
     const [deviceTypeId, setDeviceTypeId] = useState()
     const [triggerTypeId,setTriggerTypeId] = useState()
+    const [triggerEditModal,setTriggerEditModal] = useState(false)
     const [actionId,setActionId] = useState()
     const [triggerId,setTriggerId] = useState()
     const [refreshDevice,setRefreshDevice] = useState(true)
@@ -20,16 +22,22 @@ function ControlCenter(){
     const [triggerList,setTriggerList] = useState([])
     const [presetData,setPresetData] = useState([])
     const [deviceId,setDeviceId] = useState()
+    const [deviceIdEdit,setDeviceIdEdit] = useState()
+    const [presetIdEdit,setPresetIdEdit] = useState()
+    const [triggerIdEdit,setTriggerIdEdit] = useState()
     const [triggerData,setTriggerData] = useState([])
     const [triggerTypeData,setTriggerTypeData] = useState([])
     const [deviceTypeData,setDeviceTypeData] = useState([])
     const [actionsData,setActionsData] = useState([])
     const [deviceTypeSelction,setDeviceTypeSelction] = useState()
+    const [deviceTypeIdEdit,setDeviceTypeIdEdit] = useState()
     const [presetSelection,setPresetSelection] = useState([])
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
     const toggleDeviceEdit = () => setDeviceEditModal(!deviceEditModal)
+    const togglePresetEdit = () => setPresetEditModal(!presetEditModal)
+    const toggleTriggerEdit = () => setTriggerEditModal(!triggerEditModal)
 
     console.log(presetSelection,'THIS IS THE LIST')
 
@@ -174,12 +182,142 @@ function ControlCenter(){
 
     function handleDeviceEdit(e,i){
         e.stopPropagation()
+        setDeviceIdEdit(i)
+        axios.post("http://localhost:8080/api/devicePerId",{deviceId: i})
+        .then(res=>{
+            // console.log(res.data,"MAPPING CONFIRMED")
+            // console.log(res.data,'FREAKING EDIT DATA')
+            if(res.data.length !==0){
+                document.getElementById('deviceNameEdit').value = res.data[0].device_name
+                document.getElementById('deviceLabelEdit').value = res.data[0].device_label
+                // document.getElementById('deviceTypeEdit').value = `${res.data[0].device_type_id}. ${res.data[0].device_type_name}}`
+                // console.log(document.getElementById('deviceTypeEdit'),'LOOKY HERE')
+                setDeviceTypeId(res.data[0].device_type)
+                let mySelect = document.getElementById('deviceTypeEdit')
+                for(let i=0; i<mySelect.options.length;i++){
+                    if(mySelect.options[i].value.split('.')[0]==res.data[0].device_type){
+                        mySelect.options[i].selected = true;
+                        console.log(mySelect.options[i],'ITS THE CHOSEN ONE')
+
+                    }
+                }
+            }
+        })
 
         toggleDeviceEdit()
     }
 
     function deviceUpdateSubmit(){
+        axios.post("http://localhost:8080/api/deviceUpdate",{deviceId: deviceIdEdit, deviceName: document.getElementById('deviceNameEdit').value, deviceLabel: document.getElementById('deviceLabelEdit').value, deviceType: deviceTypeId })
+        .then(res=>{
+                console.log(res.data,'UPDATE RESPONSE')
+        })
+        setRefreshDevice(!refreshDevice)
+        toggleDeviceEdit()
+    }
 
+    function handlePresetEdit(e,i){
+        e.stopPropagation()
+        setPresetIdEdit(i)
+        axios.post("http://localhost:8080/api/presetPerId",{presetId: i})
+        .then(res=>{
+            if(res.data.length !==0){
+                document.getElementById('presetNameEdit').value = res.data[0].preset_name
+                if(res.data[0].default_preset===1){
+                    document.getElementById('defaultPresetEdit').checked = true
+                }
+            }
+            console.log(res.data,'PRESET EDIT DATA')
+        })
+
+        togglePresetEdit()
+    }
+
+    function presetUpdateSubmit(){
+        axios.post("http://localhost:8080/api/presetUpdate",{presetId: presetIdEdit, presetName: document.getElementById('presetNameEdit').value, defaultPreset: document.getElementById('defaultPresetEdit').checked?1:0 })
+        .then(res=>{
+                console.log(res.data,'UPDATE RESPONSE')
+        }) 
+        setRefreshPreset(!refreshPreset)
+        togglePresetEdit()
+    }
+
+    function handleTriggerEdit(e,i){
+        e.stopPropagation()
+        setTriggerIdEdit(i)
+        axios.post("http://localhost:8080/api/triggerPerId",{triggerId: i})
+        .then(res=>{
+            console.log(res.data,'TRIGGER ID DATA')
+            if(res.data.length !==0){
+                document.getElementById('triggerNameEdit').value = res.data[0].trigger_name
+                // DEVICE TRIGGER EDIT
+                let mySelect = document.getElementById('deviceTriggerEdit')
+                setDeviceId(res.data[0].device_id)
+                for(let i=0; i<mySelect.options.length;i++){
+                    if(mySelect.options[i].value.split('.')[0]==res.data[0].device_id){
+                        mySelect.options[i].selected = true;
+                        console.log(mySelect.options[i],'ITS THE CHOSEN ONE')
+
+                    }
+                }
+
+                // TRIGGER TYPE EDIT
+                let mySelect1 = document.getElementById('TriggerTypeEdit')
+                for(let i=0; i<mySelect1.options.length;i++){
+                    if(mySelect1.options[i].value.split('.')[0]==res.data[0].trigger_type){
+                        mySelect1.options[i].selected = true;
+                        console.log(mySelect1.options[i],'ITS THE CHOSEN ONE')
+
+                    }
+                }
+
+                // TRIGGER ACTIONS
+                let mySelect2 = document.getElementById('actionEdit')
+                for(let i=0; i<mySelect2.options.length;i++){
+                    if(mySelect2.options[i].value.split('.')[0]==res.data[0].trigger_action_id){
+                        mySelect2.options[i].selected = true;
+                        console.log(mySelect2.options[i],'ITS THE CHOSEN ONE')
+
+                    }
+                }
+
+                // PRESET SELECTION
+                let mySelect3 = document.getElementById('presetSelectEdit')
+                
+                    axios.post("http://localhost:8080/api/presetPerTrigger",{triggerId: i})
+                    .then(res=>{
+                        res.data.forEach(item=>{
+                        for(let i=0; i<mySelect3.options.length;i++){
+                            
+                            if(mySelect3.options[i].value.split('.')[0]==item.preset_id){
+                                mySelect3.options[i].selected = true;
+                                console.log(mySelect3.options[i],'ITS THE CHOSEN ONE')
+        
+                            }
+                        }
+                        })
+                        
+                        console.log(res.data,'FUCK THIS')
+                    })
+
+                //TRIGGER ACTION INPUT
+                
+                document.getElementById('actionInputEdit').value = res.data[0].options
+            }
+        })
+
+        toggleTriggerEdit()
+    }
+
+    function triggerUpdateSubmit(){
+
+        axios.post("http://localhost:8080/api/triggerUpdate",{triggerId: triggerIdEdit, triggerName: document.getElementById('triggerNameEdit').value, deviceId: deviceId, triggerType: triggerTypeId, triggerActionId: actionId,options: `${document.getElementById('actionInputEdit').value}` })
+        .then(res=>{
+                console.log(res.data,'UPDATE RESPONSE')
+        }) 
+        setRefreshTrigger(!refreshTrigger)
+        toggleTriggerEdit()
+        
     }
 
     useEffect(()=>{
@@ -405,6 +543,7 @@ function ControlCenter(){
                                 <td className="presetItem" onClick={(e)=>{handlePresetClick(e.target)}}>{i.preset_id}. {i.preset_name}
                                 
                                 <button type="button" class="close material-icons delete" aria-label="Close" onClick={(e)=>{handlePresetDelete(e,i.preset_id)}}>&#xE5C9;</button>
+                                <button type="button" class="close material-icons edit" aria-label="Close" onClick={(e)=>{handlePresetEdit(e,i.preset_id)}}>&#xE3C9;</button>
                                 </td>
                             </tr>
                         )
@@ -464,6 +603,7 @@ function ControlCenter(){
                             <tr>
                                 <td>{i.trigger_name}
                                 <button type="button" class="close material-icons delete" aria-label="Close" onClick={()=>{hadnleTriggerDelete(i.trigger_id)}}>&#xE5C9;</button>
+                                <button type="button" class="close material-icons edit" aria-label="Close" onClick={(e)=>{handleTriggerEdit(e,i.trigger_id)}}>&#xE3C9;</button>
                                 </td>
                             </tr>
                         )
@@ -475,7 +615,7 @@ function ControlCenter(){
                 </tbody>
                 </Table>
                 <Modal isOpen={triggerModal} toggle={toggleTrigger}>
-              <ModalHeader toggle={toggleTrigger}>Configure Device</ModalHeader>
+              <ModalHeader toggle={toggleTrigger}>Configure Trigger</ModalHeader>
               <ModalBody>
               <Form>
                 <FormGroup>
@@ -522,7 +662,7 @@ function ControlCenter(){
                     </Input>
                 </FormGroup>
                 <FormGroup>
-                    <Label for="actions">Actions(Static for now):</Label>
+                    <Label for="actions">Actions:</Label>
                     <Input type="select" name="actions" id="action" onChange={(e)=>{handleActionOnChange(e)}}>
                     {/* <option>setSate</option>
                     <option>togglePower</option>
@@ -588,6 +728,7 @@ function ControlCenter(){
                 </FormGroup>
                 <FormGroup>
                     <Label for="deviceType">Device Type</Label>
+                    {/* <Input type="select" name="deviceType" id="deviceTypeEdit" > */}
                     <Input type="select" name="deviceType" id="deviceTypeEdit"  onChange={(e)=>handleDeviceTypeOnChange(e)}>
                     {/* <option>Lifx</option>
                     <option>Wemo</option>
@@ -613,6 +754,139 @@ function ControlCenter(){
               </ModalFooter>
             </Modal>
             </div>
+
+            {/* ******************PRESET EDIT MODAL***************************** */}
+            <div>
+            <Modal isOpen={presetEditModal} toggle={togglePresetEdit}>
+              <ModalHeader toggle={togglePresetEdit}>Configure Preset</ModalHeader>
+              <ModalBody>
+              <Form>
+                <FormGroup>
+                    <Label for="presetNameEdit">Preset Name</Label>
+                    <Input type="text" name="presetNameEdit" id="presetNameEdit" placeholder="Preset Name" />
+                </FormGroup>
+                <div>
+                    Trigger List:
+                </div>
+                <FormGroup check>
+                    <Label check>
+                    <Input type="checkbox" id="defaultPresetEdit"/>{' '}
+                    Default
+                    </Label>
+                </FormGroup>
+                </Form>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" onClick={()=>{presetUpdateSubmit()}}>Submit</Button>{' '}
+                <Button color="danger" onClick={togglePresetEdit}>Cancel</Button>
+              </ModalFooter>
+            </Modal>
+
+            </div>
+
+            {/* ******************TRIGGER EDIT MODAL***************************** */}
+
+            <div>
+            <Modal isOpen={triggerEditModal} toggle={toggleTriggerEdit}>
+              <ModalHeader toggle={toggleTriggerEdit}>Configure Trigger</ModalHeader>
+              <ModalBody>
+              <Form>
+                <FormGroup>
+                    <Label for="triggerNameEdit">Trigger Name</Label>
+                    <Input type="text" name="triggerNameEdit" id="triggerNameEdit" placeholder="Trigger Name" />
+                </FormGroup>
+                <FormGroup>
+                    <Label for="deviceTrigger">Devices:</Label>
+                    <Input type="select" name="deviceTrigger" id="deviceTriggerEdit" onChange={(e)=>{handleDeviceOnchange(e)}}>
+                    {/* <option>Lifx</option>
+                    <option>Wemo</option>
+                    <option>USB</option>
+                    <option>GPIO</option> */}
+                    {
+                    deviceData.map((i)=>{
+                        return(
+                            <option onSelect={()=>{setDeviceId(i.device_id)}}>
+                               {i.device_id}. {i.device_name}
+                            </option>
+                        )
+                    })
+                    }
+                    </Input>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="triggerType">Trigger Type:</Label>
+                    <Input type="select" name="triggerType" id="TriggerTypeEdit" onChange={(e)=>{handleTriggerTypeOnchange(e)}}>
+                    {/* <option>Donation</option>
+                    <option>Follow</option>
+                    <option>Channel Point Redemption</option>
+                    <option>Subscription</option>
+                    <option>Cheer</option>
+                    <option>Chat Message</option>
+                    <option>Resub</option> */}
+                    {
+                        triggerTypeData.map((i)=>{
+                            return(
+                                <option>
+                                {i.trigger_type_id}. {i.trigger_type_name}
+                                </option>
+                            )
+                        })
+                    }
+                    </Input>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="actions">Actions:</Label>
+                    <Input type="select" name="actions" id="actionEdit" onChange={(e)=>{handleActionOnChange(e)}}>
+                    {/* <option>setSate</option>
+                    <option>togglePower</option>
+                    <option>breatheEffect</option>
+                    <option>WemoOn</option>
+                    <option>WemoOff</option>
+                    <option>Chat Message</option>
+                    <option>USBon</option>
+                    <option>USBoff</option>
+                    <option>GPIOon</option>
+                    <option>GPIOoff</option> */}
+                    {
+                        actionsData.map((i)=>{
+                            return(
+                                <option>
+                                    {i.trigger_action_id}. {i.action}
+                                </option>
+                            )
+                        })
+                    }
+                    </Input>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="actionInput">Action Input:</Label>
+                    <Input type="text" name="actionInput" id="actionInputEdit" placeholder="Action Input" />
+                </FormGroup>
+                <div>
+                Preset List:
+                <Input type="select" name="selectMulti" id="presetSelectEdit" multiple onChange={(e)=>{handlePresetSelection(e.target)}}>
+                    {
+                    presetData.map((i)=>{
+                        return(
+                            <option>
+                               {i.preset_id}. {i.preset_name}
+                            </option>
+                        )
+                    })
+                    }
+                </Input>
+                </div>
+                </Form>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" onClick={()=>{triggerUpdateSubmit()}}>Submit</Button>{' '}
+                <Button color="danger" onClick={toggleTriggerEdit}>Cancel</Button>
+              </ModalFooter>
+            </Modal>
+            </div>
+
+            
+
 
         </div>
 
