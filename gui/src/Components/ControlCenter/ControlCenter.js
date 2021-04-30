@@ -6,6 +6,7 @@ import axios from 'axios'
 function ControlCenter(){
 
     const [deviceModal,setDeviceModal] = useState(false)
+    const [deviceEditModal,setDeviceEditModal] = useState(false)
     const [presetModal,setPresetModal] = useState(false)
     const [triggerModal,setTriggerModal] = useState(false)
     const [deviceData, setDeviceData] = useState([])
@@ -28,6 +29,7 @@ function ControlCenter(){
     const toggleDevice = () => setDeviceModal(!deviceModal);
     const togglePreset = () => setPresetModal(!presetModal);
     const toggleTrigger = () => setTriggerModal(!triggerModal);
+    const toggleDeviceEdit = () => setDeviceEditModal(!deviceEditModal)
 
     console.log(presetSelection,'THIS IS THE LIST')
 
@@ -168,6 +170,18 @@ function ControlCenter(){
 
     }
 
+    // *******************EDIT FUNCTIONS*******************************
+
+    function handleDeviceEdit(e,i){
+        e.stopPropagation()
+
+        toggleDeviceEdit()
+    }
+
+    function deviceUpdateSubmit(){
+
+    }
+
     useEffect(()=>{
         console.log(triggerList,'YOU GETTING IT')
         let triggerDict = Object();
@@ -214,7 +228,10 @@ function ControlCenter(){
         .then(res=>{
             console.log(res.data,'DEVICE LIST')
             setDeviceData(res.data)
-            setDeviceId(res.data[0].device_id)
+            if(res.data.length!==0){
+
+                setDeviceId(res.data[0].device_id)
+            }
         })
       },[deviceModal,refreshDevice]);
 
@@ -252,7 +269,10 @@ function ControlCenter(){
         .then(res=>{
             // console.log(res.data,'ACTIONS LIST')
             setTriggerTypeData(res.data)
-            setTriggerTypeId(res.data[0].trigger_type_id)
+            if(res.data.length!==0){
+
+                setTriggerTypeId(res.data[0].trigger_type_id)
+            }
         })
       },[]);
 
@@ -262,7 +282,10 @@ function ControlCenter(){
         .then(res=>{
             // console.log(res.data,'DEVICE TYPE LIST')
             setDeviceTypeData(res.data)
-            setDeviceTypeId(res.data[0].device_type_id)
+            if(res.data.length !== 0){
+
+                setDeviceTypeId(res.data[0].device_type_id)
+            }
             // console.log(res.data[0],'WTF')
         })
         // console.log(deviceTypeData,'WTF')
@@ -307,11 +330,11 @@ function ControlCenter(){
                             <tr>
                                 <td>{i.device_id}. {i.device_name}
                                 <button type="button" class="close material-icons delete" aria-label="Close" onClick={()=>{handleDeviceDelete(i.device_id)}}>&#xE5C9;</button>
-                                <button type="button" class="close material-icons edit" aria-label="Close" onClick={()=>{handleDeviceDelete(i.device_id)}}>&#xE3C9;</button>
+                                <button type="button" class="close material-icons edit" aria-label="Close" onClick={(e)=>{handleDeviceEdit(e,i.device_id)}}>&#xE3C9;</button>
                                 </td>
                             </tr>
                         )
-                    })
+                    })  
                 }
                 <tr>
                 <td><button onClick={()=>{setDeviceModal(true)}}>Add a Device</button></td>
@@ -545,6 +568,48 @@ function ControlCenter(){
               <ModalFooter>
                 <Button color="primary" onClick={()=>{triggerSubmit()}}>Submit</Button>{' '}
                 <Button color="danger" onClick={toggleTrigger}>Cancel</Button>
+              </ModalFooter>
+            </Modal>
+            </div>
+
+            {/* ******************DEVICE EDIT MODAL***************************** */}
+            <div>
+            <Modal isOpen={deviceEditModal} toggle={toggleDeviceEdit}>
+              <ModalHeader toggle={toggleDeviceEdit}>Configure Device</ModalHeader>
+              <ModalBody>
+              <Form>
+                <FormGroup>
+                    <Label for="deviceName">Device Name</Label>
+                    <Input type="text" name="deviceName" id="deviceNameEdit" placeholder="Device Name" required/>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="deviceLabel">Device Label</Label>
+                    <Input type="text" name="deviceLabel" id="deviceLabelEdit" placeholder="Device Label" />
+                </FormGroup>
+                <FormGroup>
+                    <Label for="deviceType">Device Type</Label>
+                    <Input type="select" name="deviceType" id="deviceTypeEdit"  onChange={(e)=>handleDeviceTypeOnChange(e)}>
+                    {/* <option>Lifx</option>
+                    <option>Wemo</option>
+                    <option>USB</option>
+                    <option>GPIO</option> */}
+                    { 
+                        deviceTypeData.map((i)=>{
+                            return(
+                                <option>
+                                    {i.device_type_id}. {i.device_type_name}
+                                </option>
+                            )
+                        })
+                    }
+                    </Input>
+                </FormGroup>
+                </Form>
+              </ModalBody>
+              <ModalFooter>
+                {/* <Button color="primary" onClick={toggleDevice}>Submit</Button>{' '} */}
+                <Button color="primary" onClick={()=>{deviceUpdateSubmit()}}>Submit</Button>{' '}
+                <Button color="danger" onClick={toggleDeviceEdit}>Cancel</Button>
               </ModalFooter>
             </Modal>
             </div>
