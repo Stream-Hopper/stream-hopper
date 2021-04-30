@@ -66,6 +66,20 @@ class EventDatabase {
         });
     }
 
+    device_LIST() {
+        let sql = `SELECT * FROM DEVICES;`;
+
+        this.db.run(sql, [], function (err) {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            cb('Good Riddance')
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
     ///////////////////////////////////////
     /// PRESETS QUERIES
     ///////////////////////////////////////
