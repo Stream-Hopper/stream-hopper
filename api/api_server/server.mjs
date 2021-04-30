@@ -336,6 +336,24 @@ async function getUserID(username, clientID){
     EventDB.device_DELETE(req.body.deviceId,cb)
   });
 
+  app.post('/api/devicePerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.device_LIST(req.body.deviceId,cb)
+  });
+
+  app.post('/api/deviceUpdate', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.device_UPDATE(req.body.deviceId, req.body.deviceName, req.body.deviceLabel, req.body.deviceType,cb)
+  });
+
 
 
   // PRESET ENDPOINTS
@@ -362,6 +380,24 @@ async function getUserID(username, clientID){
       res.send(data)
     }
     EventDB.presets_DELETE(req.body.presetId,cb)
+  });
+
+  app.post('/api/presetPerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.preset_LIST(req.body.presetId,cb)
+  });
+
+  app.post('/api/presetUpdate', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.presets_UPDATE(req.body.presetId,req.body.presetName,req.body.defaultPreset,cb)
   });
   // TRIGGER ENDPOINTS
   app.get('/api/getTriggers', async (req, res) => {
@@ -423,6 +459,24 @@ async function getUserID(username, clientID){
       res.send(data)
     }
     EventDB.listPresetsPerTrigger(req.body.triggerId,cb)
+  });
+
+  app.post('/api/triggerPerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.trigger_LIST(req.body.triggerId,cb)
+  });
+
+  app.post('/api/triggerUpdate', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.triggers_UPDATE(req.body.triggerName,req.body.deviceId,req.body.triggerType,req.body.triggerActionId,req.body.options,req.body.triggerId,cb)
   });
 
   app.post('/api/triggerPresetMap', async (req, res) => {

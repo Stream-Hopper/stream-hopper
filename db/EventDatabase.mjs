@@ -40,13 +40,15 @@ class EventDatabase {
         //return response;
     }
 
-    device_UPDATE(device_id, device_name, device_label, device_type) {
+    device_UPDATE(device_id, device_name, device_label, device_type,cb) {
         let sql = `UPDATE DEVICES SET device_name=?, device_label=?, device_type=? WHERE device_id=?;`;
 
         this.db.run(sql, [device_name, device_label, device_type, device_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('UPDATED')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -66,15 +68,20 @@ class EventDatabase {
         });
     }
 
-    device_LIST() {
-        let sql = `SELECT * FROM DEVICES;`;
-
-        this.db.run(sql, [], function (err) {
+    device_LIST(device_id,cb) {
+        let sql = `SELECT * FROM DEVICES WHERE device_id=?;`;
+        let data = []
+        this.db.all(sql, [device_id],(err,rows) => {
             if (err) {
                 cb(err.message)
                 return console.log(err.message);
             }
-            cb('Good Riddance')
+            rows.forEach(row => {
+                console.log(row);
+                data.push(row)
+            });
+
+            cb(data);
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -97,13 +104,15 @@ class EventDatabase {
         });
     }
 
-    presets_UPDATE(preset_id, preset_name, default_preset) {
+    presets_UPDATE(preset_id, preset_name, default_preset,cb) {
         let sql = `UPDATE PRESETS SET preset_name=?, default_preset=? WHERE preset_id=?;`;
 
         this.db.run(sql, [preset_name, default_preset, preset_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('PRESET UPDATED')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -118,6 +127,25 @@ class EventDatabase {
                 return console.log(err.message);
             }
             cb('GOOD RIDDANCE')
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
+    preset_LIST(preset_id,cb) {
+        let sql = `SELECT * FROM PRESETS WHERE preset_id=?;`;
+        let data = []
+        this.db.all(sql, [preset_id],(err,rows) => {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            rows.forEach(row => {
+                console.log(row);
+                data.push(row)
+            });
+
+            cb(data);
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -140,13 +168,15 @@ class EventDatabase {
         });
     }
 
-    triggers_UPDATE(trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id) {
+    triggers_UPDATE(trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id,cb) {
         let sql = `UPDATE TRIGGERS SET trigger_name=?, device_id=?, trigger_type=?, trigger_action_id=?, options=? WHERE trigger_id=?;`;
 
         this.db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('UPDATE TRIGGER')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -163,6 +193,25 @@ class EventDatabase {
             cb("GOOD RIDDANCE")
             // get the last insert id
             //.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
+    trigger_LIST(trigger_id,cb) {
+        let sql = `SELECT * FROM TRIGGERS WHERE trigger_id=?;`;
+        let data = []
+        this.db.all(sql, [trigger_id],(err,rows) => {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            rows.forEach(row => {
+                console.log(row);
+                data.push(row)
+            });
+
+            cb(data);
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
     }
 
