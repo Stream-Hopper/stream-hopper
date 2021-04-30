@@ -182,7 +182,10 @@ function ControlCenter(){
         axios.post("http://localhost:8080/api/triggerDictPerId",{triggerId: trigger.trigger_id})
         .then(res=>{
             // console.log(res.data[0],'FUCKING DICTIONARY')
-            triggerDict[res.data[0].trigger_type_name].push(res.data[0])
+            if(res.data.length!==0){
+
+                triggerDict[res.data[0].trigger_type_name].push(res.data[0])
+            }
             console.log(triggerDict,'DICTIONARY')
 
             axios.post("http://localhost:8080/api/receiveDict",{triggerArray: triggerDict})
