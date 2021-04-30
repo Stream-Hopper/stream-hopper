@@ -236,7 +236,11 @@ function ControlCenter(){
         .then(res=>{
             console.log(res.data,'ACTIONS LIST')
             setActionsData(res.data)
-            setActionId(res.data[0].trigger_action_id)
+            if(res.data.length !== 0){
+
+                setActionId(res.data[0].trigger_action_id)
+            }
+            // console.log(res.data[0].trigger_action_id,'MOTHERFUCKER')
         })
       },[deviceId]);
 
@@ -300,6 +304,7 @@ function ControlCenter(){
                             <tr>
                                 <td>{i.device_id}. {i.device_name}
                                 <button type="button" class="close material-icons delete" aria-label="Close" onClick={()=>{handleDeviceDelete(i.device_id)}}>&#xE5C9;</button>
+                                <button type="button" class="close material-icons edit" aria-label="Close" onClick={()=>{handleDeviceDelete(i.device_id)}}>&#xE3C9;</button>
                                 </td>
                             </tr>
                         )
