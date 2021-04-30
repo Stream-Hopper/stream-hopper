@@ -258,6 +258,20 @@ class EventDatabase {
         });
     }
 
+    P2TMAP_DELETE_TRIGGER(trigger_id,cb) {
+        let sql = `DELETE FROM PRESET_2_TRIGGER_MAP WHERE trigger_id=?;`;
+
+        this.db.run(sql, [preset_id, trigger_id], function (err) {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            cb('GOOD RIDDANCE')
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
     ///////////////////////////////////////
     /// SELECT QUERIES
     ///////////////////////////////////////

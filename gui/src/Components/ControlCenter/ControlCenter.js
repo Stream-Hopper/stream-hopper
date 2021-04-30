@@ -315,6 +315,22 @@ function ControlCenter(){
         .then(res=>{
                 console.log(res.data,'UPDATE RESPONSE')
         }) 
+
+        axios.post("http://localhost:8080/api/triggerPresetMapDelete",{triggerId: triggerIdEdit})
+        .then(res=>{
+            // console.log(res.data,"MAPPING CONFIRMED")
+            console.log('BYE BYE')
+        })
+
+        for(let i=0; i<presetSelection.length;i++){
+            axios.post("http://localhost:8080/api/triggerPresetMap",{triggerId: triggerIdEdit,presetId: presetSelection[i]})
+            .then(res=>{
+                console.log(res.data,"MAPPING CONFIRMED")
+            })
+
+        }
+
+
         setRefreshTrigger(!refreshTrigger)
         toggleTriggerEdit()
         
