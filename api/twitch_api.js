@@ -67,7 +67,7 @@ class TwitchAPI {
     static async getUserID(username, clientID){
         var baseUrl = `https://api.twitch.tv/kraken/users?login=${username}`;
 
-        const options = { 
+        const options = {
             method: 'GET',
             headers: {
                 'Accept': 'application/vnd.twitchtv.v5+json',

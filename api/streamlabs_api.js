@@ -116,7 +116,7 @@ class StreamLabsAPI {
     params.append('image_href', null);
     params.append('message', ' ');
     params.append('user_message', ' ');
-    params.append('sound_href', `http://localhost:8080/audio/${filename}`);
+    params.append('sound_href', `http://192.168.0.10:8080/audio/${filename}`);
 
     const options = {
       method: 'POST',

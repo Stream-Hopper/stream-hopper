@@ -508,8 +508,7 @@ class Event_Handler {
         switch(trigger.action) {
           case 'setState':      LIFXAPIClient.setState(trigger.device_label, 'on', trigger.options); break;
           case 'togglePower':   LIFXAPIClient.togglePower(trigger.device_label); break;
-          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.device_label, trigger.options, "#000000", 1, 10);
-                streamlabsAPIClient.donationAlert('im-kind-of-retarded-alex-jones.mp3'); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.device_label, trigger.options, "#000000", 1, 10); break;
           case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.device_label); break;
           case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.device_label, trigger.options, "#000000", 1, 10); break;
           case 'wemoOn':        WEMOAPIClient.set_wemo_on(trigger.device_label); break;
@@ -518,6 +517,15 @@ class Event_Handler {
           case 'usbOff':        USBAPIClient.turnOffUSBPorts(); break;
           case 'gpioOn':        GPIOAPIClient.toggle(trigger.device_label, 1); break;
           case 'gpioOff':       GPIOAPIClient.toggle(trigger.device_label, 0); break;
+          case 'playAudio':     streamlabsAPIClient.donationAlert(trigger.options); break;
+          case 'playTTS':       if (apiMessage.hasOwnProperty('message'))
+                                {
+                                    streamlabsAPIClient.ttsAlert(apiMessage.message); break;
+                                }
+                                else
+                                {
+                                    streamlabsAPIClient.ttsAlert(trigger.options); break;
+                                }
         }
       });
     }
@@ -543,4 +551,4 @@ let twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitc
 twitchClient.startEventSubs();
 
 // Test donation
-streamlabsAPIClient.donationAlert('tedcruz-mistake.mp3');
+//streamlabsAPIClient.donationAlert('tedcruz-mistake.mp3');

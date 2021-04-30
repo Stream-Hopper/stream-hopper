@@ -37,7 +37,7 @@ class EventDatabase {
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
 
-        return response;
+        //return response;
     }
 
     device_UPDATE(device_id, device_name, device_label, device_type) {
@@ -392,11 +392,11 @@ class EventDatabase {
                 "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (2, 'Lifx')\;" +
                 "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (3, 'Wemo')\;" +
                 "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (4, 'GPIO')\;" +
+                "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (5, 'Audio')\;" +
 
 
                 "DROP TABLE IF EXISTS DEVICES\;" +
                 "CREATE TABLE DEVICES (device_id INTEGER PRIMARY KEY UNIQUE NOT NULL, device_name STRING UNIQUE NOT NULL, device_label STRING, device_type REFERENCES " + "DEVICE_TYPE (device_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL)\;" +
-                "INSERT INTO DEVICES (device_id, device_name, device_label, device_type) VALUES (1, 'lab bulb', 'Lightbulb', 2)\;" +
 
 
                 "DROP TABLE IF EXISTS PRESET_2_TRIGGER_MAP\;" +
@@ -404,8 +404,6 @@ class EventDatabase {
 
                 "DROP TABLE IF EXISTS PRESETS\;" +
                 "CREATE TABLE PRESETS (preset_id INTEGER PRIMARY KEY UNIQUE NOT NULL, preset_name STRING UNIQUE NOT NULL, default_preset BOOLEAN NOT NULL)\;" +
-                "INSERT INTO PRESETS (preset_id, preset_name, default_preset) VALUES (1, 'Default Preset', 1)\;" +
-                "INSERT INTO PRESETS (preset_id, preset_name, default_preset) VALUES (3, 'TEST PRESET', 0)\;" +
 
 
                 "DROP TABLE IF EXISTS TRIGGER_ACTIONS\;" +
@@ -421,6 +419,8 @@ class EventDatabase {
                 "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (9, 'usbOff', 1)\;" +
                 "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (10, 'gpioOn', 4)\;" +
                 "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (11, 'gpioOff', 4)\;" +
+                "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (12, 'playAudio', 5)\;" +
+                "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (13, 'playTTS', 5)\;" +
                 "DROP TABLE IF EXISTS TRIGGER_TYPE\;" +
                 "CREATE TABLE TRIGGER_TYPE (trigger_type_id INTEGER PRIMARY KEY UNIQUE NOT NULL, trigger_type_name STRING UNIQUE NOT NULL)\;" +
                 "INSERT INTO TRIGGER_TYPE (trigger_type_id, trigger_type_name) VALUES (1, 'donation')\;" +
@@ -435,8 +435,6 @@ class EventDatabase {
                 "   INTEGER REFERENCES DEVICES (device_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_type INTEGER REFERENCES " +
                 "TRIGGER_TYPE (trigger_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_action_id INTEGER REFERENCES " +
                 "TRIGGER_ACTIONS (trigger_action_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, options STRING)\;" +
-                "INSERT INTO TRIGGERS (trigger_id, trigger_name, device_id, trigger_type, trigger_action_id, options) VALUES (1, 'test_trigger', 1, 6, 1, '#FFFFFF')\;" +
-                "INSERT INTO TRIGGERS (trigger_id, trigger_name, device_id, trigger_type, trigger_action_id, options) VALUES (2, 'TEST TRIGGER 2', 1, 2, 2, '#BBBBBB')\;" +
                 "DROP TABLE IF EXISTS USER\;" +
                 "COMMIT TRANSACTION\;" +
                 "PRAGMA foreign_keys = on;");
