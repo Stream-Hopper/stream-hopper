@@ -542,8 +542,8 @@ const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08
 const LIFXAPIClient = new LIFXAPI(apiToken);
 const WEMOAPIClient = new WEMOAPI();
 const GPIOAPIClient = new GPIOAPI();
-//const USBAPIClient = new USBAPI();
-//await USBAPIClient.init();
+const USBAPIClient = new USBAPI();
+await USBAPIClient.init();
 await LIFXAPIClient.init();
 
 // init the event handler
