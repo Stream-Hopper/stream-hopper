@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import express from 'express';
-import Database from './db.mjs';
 import bodyParser from 'body-parser';
 import fs from 'fs';
 import cors from 'cors';
@@ -22,29 +21,33 @@ var triggerDict = {};
 
 // StreamLabs Tokens
 // Tokens for the bot in use - will eventually get these from GUI and save them securely
-const streamlabsClientID = 'lzEr0OVv9OWUqm8vW7QWO4B5XigrQc0dxFcLvrLk';
-const streamlabsClientSecret = 'mBNuOyyOQgysLOHzkZVnQO8iPtxdg58KKGSB4boY';
-const streamlabsAccessToken = '4rh6uxzo34r2rsKQqTPOipVPL9CqL69eQltYoo8V';
-const streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
-const streamlabsRefreshToken = 'NZQ6Xbt81eJehfkCNA7XsMICDLG9Kh6yMaGQupL5';
-const streamlabsUri = 'http://localhost:3000';
-const streamlabsRedirectURI = 'http://localhost:3000'
+var streamlabsClientID = 'lzEr0OVv9OWUqm8vW7QWO4B5XigrQc0dxFcLvrLk';
+var streamlabsClientSecret = 'mBNuOyyOQgysLOHzkZVnQO8iPtxdg58KKGSB4boY';
+var streamlabsAccessToken = null;
+var streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
+var streamlabsRefreshToken = null;
+var streamlabsUri = 'http://localhost:3000';
+var streamlabsRedirectURI = 'http://localhost:3000'
 
 // Twitch Tokens
 // Bot tokens and such
 // These should be changed to the StreamHopper's credentials (obviously)
-const twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
-const twitchAccessToken = '29qqic0xdts63hqz85ejlwvcfvt034';
-const twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
-const twitchRefreshToken = 'uwq0krupsxw63a1lovgxxsdcz7g7uccirhxhy1hqr0o5w6cem1';
-const twitchDevUsername = 'Stream_Hoppers';
-const twitchChannelUsername = 'Stream_Hoppers';
-const twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
-const twitchRedirectURI = 'http://localhost:3000'
+var twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
+var twitchAccessToken = '29qqic0xdts63hqz85ejlwvcfvt034';
+var twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
+var twitchRefreshToken = 'uwq0krupsxw63a1lovgxxsdcz7g7uccirhxhy1hqr0o5w6cem1';
+var twitchDevUsername = 'Stream_Hoppers';
+var twitchChannelUsername = 'Stream_Hoppers';
+var twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
+var twitchRedirectURI = 'http://localhost:3000'
+var ex
 
 // Create the Database instance
-var userDatabase = new Database.Database('./db.sqlite');
 var EventDB = new EventDatabase.EventDatabase('db/streamhopper.sqlite');
+
+var streamlabsAPIClient;
+var twitchClient;
+
 
 async function getUserID(username, clientID){
   var baseUrl = `https://api.twitch.tv/kraken/users?login=${username}`;
@@ -149,46 +152,8 @@ async function getUserID(username, clientID){
     res.redirect(`https://id.twitch.tv/oauth2/authorize?client_id=${twitchClientID}&redirect_uri=${twitchRedirectURI}&response_type=${'code'}&scope=${twitchScopes}`);
   })
 
-  // Redirect URI used by the Streamlabs API when the user authorizes their account 
-  app.get('/streamlabs', async (req, res) => {
-
-    let code = req.query.code;
-    let accessToken;
-    let refreshToken;
-
-    var baseUrl = 'https://streamlabs.com/api/v1.0/token';
-    var params = new URLSearchParams();
-
-    params.append('client_id', streamlabsClientID);
-    params.append('client_secret', streamlabsClientSecret);
-    params.append('code', code);
-    params.append('grant_type', 'authorization_code');
-    params.append('redirect_uri', streamlabsRedirectURI);
-
-    const options = { 
-      method: 'POST',
-      body: params
-    };
-
-    // Send the POST request
-    await fetch(baseUrl, options)
-      .then(res => res.json())
-      .then(json => {
-        res.send(json);
-        let query = {
-          streamlabs_access_token: json.access_token,
-          streamlabs_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
-      })
-      .catch(err => console.error('error:' + err));
-    
-  })
-
   app.post('/api/getToken/streamlabs', async (req, res) => {
     let code = req.body.code;
-    let accessToken;
-    let refreshToken;
 
     var baseUrl = 'https://streamlabs.com/api/v1.0/token';
     var params = new URLSearchParams();
@@ -209,11 +174,8 @@ async function getUserID(username, clientID){
       .then(res => res.json())
       .then(json => {
         res.send(json);
-        let query = {
-          streamlabs_access_token: json.access_token,
-          streamlabs_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
+        streamlabsAccessToken = json.access_token;
+        streamlabsRefreshToken = json.refresh_token;
       })
       .catch(err => console.error('error:' + err));
   });
@@ -240,47 +202,12 @@ async function getUserID(username, clientID){
       .then(res => res.json())
       .then(json => {
         res.send(json);
-        let query = {
-          twitch_access_token: json.access_token,
-          twitch_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
+        twitchAccessToken = json.access_token,
+        twitchRefreshToken = json.refresh_token
       })
       .catch(err => console.error('error:' + err));
   });
 
-  // Redirect URI used by the Twitch API when the user authorizes their account 
-  app.get('/twitch', async (req, res) => {
-
-    let code = req.query.code;
-
-    var baseUrl = 'https://id.twitch.tv/oauth2/token';
-    var params = new URLSearchParams();
-
-    params.append('client_id', twitchClientID);
-    params.append('client_secret', twitchClientSecret);
-    params.append('code', code);
-    params.append('grant_type', 'authorization_code');
-    params.append('redirect_uri', twitchRedirectURI);
-
-    const options = { 
-      method: 'POST',
-      body: params
-    };
-
-    // Send the POST request
-    await fetch(baseUrl, options)
-      .then(res => res.json())
-      .then(json => {
-        res.send(json);
-        let query = {
-          twitch_access_token: json.access_token,
-          twitch_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
-      })
-      .catch(err => console.error('error:' + err));
-  })
 
   // Endpoint that hosts an audio file.. 
   // Used by the Streamlabs API for donation alert audio 
@@ -514,6 +441,8 @@ async function getUserID(username, clientID){
     EventDB.dictFormatTrigger(req.body.triggerId,cb)
   });
 
+
+
   app.post('/api/receiveDict', async (req, res) => {
     // EventDB.listDevices()
     // console.log(req.body.triggerDict,"THIS IS OUR DICTIONARY")
@@ -522,6 +451,20 @@ async function getUserID(username, clientID){
     console.log(triggerDict,'IN ORDER')
     res.send('GOT IT')
     
+  });
+
+  app.get('/api/getUserInfo', async (req, res) => {
+    if(twitchRefreshToken != null && twitchAccessToken != null && streamlabsAccessToken != null && streamlabsRefreshToken != null){
+      streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, event_handler.findEventMatch);
+      twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, event_handler.findEventMatch);
+      // start the Event Subscription API
+      await twitchClient.startEventSubs();
+      res.send('1');
+      return;
+    }else{
+      res.send('0');
+    }
+
   });
 
 
@@ -599,18 +542,9 @@ const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08
 const LIFXAPIClient = new LIFXAPI(apiToken);
 const WEMOAPIClient = new WEMOAPI();
 const GPIOAPIClient = new GPIOAPI();
-const USBAPIClient = new USBAPI();
-await USBAPIClient.init();
+//const USBAPIClient = new USBAPI();
+//await USBAPIClient.init();
 await LIFXAPIClient.init();
 
 // init the event handler
 const event_handler = new Event_Handler();
-    // Create API Objects
-let streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, event_handler.findEventMatch);
-let twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, event_handler.findEventMatch);
-
-// start the Event Subscription API
-twitchClient.startEventSubs();
-
-// Test donation
-//streamlabsAPIClient.donationAlert('tedcruz-mistake.mp3');
