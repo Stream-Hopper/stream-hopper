@@ -27,20 +27,19 @@ var streamlabsAccessToken = null;
 var streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
 var streamlabsRefreshToken = null;
 var streamlabsUri = 'http://localhost:3000';
-var streamlabsRedirectURI = 'http://localhost:3000'
+var streamlabsRedirectURI = 'http://localhost:3000';
 
 // Twitch Tokens
 // Bot tokens and such
 // These should be changed to the StreamHopper's credentials (obviously)
 var twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
-var twitchAccessToken = '29qqic0xdts63hqz85ejlwvcfvt034';
+var twitchAccessToken = null;
 var twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
-var twitchRefreshToken = 'uwq0krupsxw63a1lovgxxsdcz7g7uccirhxhy1hqr0o5w6cem1';
+var twitchRefreshToken = null;
 var twitchDevUsername = 'Stream_Hoppers';
 var twitchChannelUsername = 'Stream_Hoppers';
 var twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
-var twitchRedirectURI = 'http://localhost:3000'
-var ex
+var twitchRedirectURI = 'http://localhost:3000';
 
 // Create the Database instance
 var EventDB = new EventDatabase.EventDatabase('db/streamhopper.sqlite');
