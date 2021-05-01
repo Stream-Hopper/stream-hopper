@@ -35,7 +35,7 @@ class TwitchAPI {
         thisModal = this;
         this.eventHandlerFunc = eventHandlerFunc;
         this.client = new tmi.client(this.opts);
-        //this.client.on('message', this.onMessage);
+        this.client.on('message', this.onMessage);
         this.client.on('subscription', this.onSubscription);
         this.client.on('resub', this.onResub);
         this.client.on("cheer", this.onCheer);

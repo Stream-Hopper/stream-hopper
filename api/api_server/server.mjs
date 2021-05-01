@@ -37,7 +37,7 @@ var twitchAccessToken = null;
 var twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
 var twitchRefreshToken = null;
 var twitchDevUsername = 'Stream_Hoppers';
-var twitchChannelUsername = 'Stream_Hoppers';
+var twitchChannelUsername = 'sng_pl4ys';
 var twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
 var twitchRedirectURI = 'http://localhost:3000';
 
