@@ -4,9 +4,8 @@ const exec = util.promisify(child_process.exec);
 
 class GPIOAPI{
     async toggle(port, mode){
-        await exec(`python gpio.py ${port} ${mode}`);
+        await exec(`python hardware/gpio.py ${port} ${mode}`);
     }
 }
 
-const gpio = new GPIOAPI();
-gpio.toggle(1, 1);
+export { GPIOAPI }

@@ -1,35 +1,52 @@
 import fetch from 'node-fetch';
 import express from 'express';
-import Database from './db.mjs';
 import bodyParser from 'body-parser';
-import cors from 'cors'
-import EventDatabase from './../../db/EventDatabase.mjs'
+import fs from 'fs';
+import cors from 'cors';
+import axios from 'axios';
+import EventDatabase from '../../db/EventDatabase.mjs';
+import StreamLabsAPI from '../streamlabs_api.js';
+import TwitchAPI from '../twitch_api.js';
+import { LIFXAPI } from '../../hardware/lifxapi.mjs';
+import { WEMOAPI } from '../../hardware/wemo_actions.mjs'
+import { GPIOAPI } from '../../hardware/GPIOAPI.mjs';
+import { USBAPI } from '../../hardware/usb.mjs';
 const app = express();
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const port = 8080
 
-// All our important information... this will be stored in the database
-const twitchScopes = "user_read+user_blocks_edit+user_blocks_read+user_follows_edit+channel_read+channel_editor+channel_commercial+channel_stream+channel_subscriptions+user_subscriptions+channel_check_subscription+channel_feed_read+channel_feed_edit+collections_edit+communities_edit+communities_moderate+viewing_activity_read+openid+analytics:read:extensions+user:edit+user:read:email+clips:edit+bits:read+analytics:read:games+user:edit:broadcast+user:read:broadcast+chat:read+chat:edit+channel:moderate+channel:read:subscriptions+whispers:read+whispers:edit+moderation:read+channel:read:redemptions+channel:edit:commercial+channel:read:hype_train+channel:read:stream_key+channel:manage:extensions+channel:manage:broadcast+user:edit:follows+channel:manage:redemptions+channel:read:editors+channel:manage:videos+user:read:blocked_users+user:manage:blocked_users+user:read:subscriptions";
-const twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
-const streamlabsClientID = 'lzEr0OVv9OWUqm8vW7QWO4B5XigrQc0dxFcLvrLk';
-const streamlabsClientSecret = 'mBNuOyyOQgysLOHzkZVnQO8iPtxdg58KKGSB4boY';
-const streamlabsScopes = 'donations.read+donations.create+alerts.create+legacy.token+socket.token+alerts.write+credits.write+profiles.write+jar.write+wheel.write+mediashare.control';
-const streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
-const twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
-const twitchRedirectURI = 'http://localhost:3000';
-const streamlabsRedirectURI = 'http://localhost:3000';
+var triggerDict = {};
 
-// We will get this value from the user in the GUI
-var twitchChannelUsername = null;
+// StreamLabs Tokens
+// Tokens for the bot in use - will eventually get these from GUI and save them securely
+var streamlabsClientID = 'lzEr0OVv9OWUqm8vW7QWO4B5XigrQc0dxFcLvrLk';
+var streamlabsClientSecret = 'mBNuOyyOQgysLOHzkZVnQO8iPtxdg58KKGSB4boY';
+var streamlabsAccessToken = null;
+var streamlabsSocketToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IkZBNUJCMDU3MDY4QUY2NDY5ODE2IiwicmVhZF9vbmx5Ijp0cnVlLCJwcmV2ZW50X21hc3RlciI6dHJ1ZSwidHdpdGNoX2lkIjoiNjUwOTM3NjU0In0.Ex-u_IFcemQLdcXPenfOQqQRnSe2mSN111X_gavMZzo';
+var streamlabsRefreshToken = null;
+var streamlabsUri = 'http://localhost:3000';
+var streamlabsRedirectURI = 'http://localhost:3000';
 
-// This will be called by the GUI ultimately but its here for testing purposes
-var twitchUserID = null;
+// Twitch Tokens
+// Bot tokens and such
+// These should be changed to the StreamHopper's credentials (obviously)
+var twitchClientID = 'ar72ur9ntqzd1cvwpmz6xroqmcqvjy';
+var twitchAccessToken = null;
+var twitchClientSecret = '2j1mrczgesxx88lphqt1ih68n1n9vu';
+var twitchRefreshToken = null;
+var twitchDevUsername = 'Stream_Hoppers';
+var twitchChannelUsername = 'sng_pl4ys';
+var twitchUserID = await getUserID(twitchChannelUsername, twitchClientID);
+var twitchRedirectURI = 'http://localhost:3000';
 
 // Create the Database instance
-var userDatabase = new Database.Database('./db.sqlite');
 var EventDB = new EventDatabase.EventDatabase('db/streamhopper.sqlite');
+
+var streamlabsAPIClient;
+var twitchClient;
+
 
 async function getUserID(username, clientID){
   var baseUrl = `https://api.twitch.tv/kraken/users?login=${username}`;
@@ -56,9 +73,6 @@ async function getUserID(username, clientID){
   return userID;
 }
 
-
-// API Endpoints
-export default async function API(){
   const server = app.listen(port, () => {
     console.log(`API listening at http://localhost:${port}`)
   })
@@ -137,46 +151,8 @@ export default async function API(){
     res.redirect(`https://id.twitch.tv/oauth2/authorize?client_id=${twitchClientID}&redirect_uri=${twitchRedirectURI}&response_type=${'code'}&scope=${twitchScopes}`);
   })
 
-  // Redirect URI used by the Streamlabs API when the user authorizes their account 
-  app.get('/streamlabs', async (req, res) => {
-
-    let code = req.query.code;
-    let accessToken;
-    let refreshToken;
-
-    var baseUrl = 'https://streamlabs.com/api/v1.0/token';
-    var params = new URLSearchParams();
-
-    params.append('client_id', streamlabsClientID);
-    params.append('client_secret', streamlabsClientSecret);
-    params.append('code', code);
-    params.append('grant_type', 'authorization_code');
-    params.append('redirect_uri', streamlabsRedirectURI);
-
-    const options = { 
-      method: 'POST',
-      body: params
-    };
-
-    // Send the POST request
-    await fetch(baseUrl, options)
-      .then(res => res.json())
-      .then(json => {
-        res.send(json);
-        let query = {
-          streamlabs_access_token: json.access_token,
-          streamlabs_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
-      })
-      .catch(err => console.error('error:' + err));
-    
-  })
-
   app.post('/api/getToken/streamlabs', async (req, res) => {
     let code = req.body.code;
-    let accessToken;
-    let refreshToken;
 
     var baseUrl = 'https://streamlabs.com/api/v1.0/token';
     var params = new URLSearchParams();
@@ -197,11 +173,8 @@ export default async function API(){
       .then(res => res.json())
       .then(json => {
         res.send(json);
-        let query = {
-          streamlabs_access_token: json.access_token,
-          streamlabs_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
+        streamlabsAccessToken = json.access_token;
+        streamlabsRefreshToken = json.refresh_token;
       })
       .catch(err => console.error('error:' + err));
   });
@@ -228,70 +201,24 @@ export default async function API(){
       .then(res => res.json())
       .then(json => {
         res.send(json);
-        let query = {
-          twitch_access_token: json.access_token,
-          twitch_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
+        twitchAccessToken = json.access_token,
+        twitchRefreshToken = json.refresh_token
       })
       .catch(err => console.error('error:' + err));
   });
 
-  // Redirect URI used by the Twitch API when the user authorizes their account 
-  app.get('/twitch', async (req, res) => {
-
-    let code = req.query.code;
-
-    var baseUrl = 'https://id.twitch.tv/oauth2/token';
-    var params = new URLSearchParams();
-
-    params.append('client_id', twitchClientID);
-    params.append('client_secret', twitchClientSecret);
-    params.append('code', code);
-    params.append('grant_type', 'authorization_code');
-    params.append('redirect_uri', twitchRedirectURI);
-
-    const options = { 
-      method: 'POST',
-      body: params
-    };
-
-    // Send the POST request
-    await fetch(baseUrl, options)
-      .then(res => res.json())
-      .then(json => {
-        res.send(json);
-        let query = {
-          twitch_access_token: json.access_token,
-          twitch_refresh_token: json.refresh_token
-        }
-        userDatabase.editData(query);
-      })
-      .catch(err => console.error('error:' + err));
-  })
 
   // Endpoint that hosts an audio file.. 
   // Used by the Streamlabs API for donation alert audio 
   app.get('/audio/:filename', (req, res) => {
     if (process.platform == 'win32'){
-      res.sendFile(process.cwd() + `\\api_server\\sounds\\${req.params.filename}`);
+      res.sendFile(process.cwd() + `\\api\\api_server\\sounds\\${req.params.filename}`);
     }else{
-      res.sendFile(process.cwd() + `/api_server/sounds/${req.params.filename}`);
+      //res.sendFile(_dirname + `/api_server/sounds/${req.params.filename}`);
+      res.sendFile(process.cwd() + `/api/api_server/sounds/${req.params.filename}`);
     }
   });
 
-  app.post('/api/updateUsername', async (req, res) => {
-    let username = req.body.username;
-    let id = await getUserID(username, twitchClientID);
-    if(id == -1){
-      res.send({status: "failed", error: 'Invalid Twitch Name'});
-    }else{
-      twitchChannelUsername = username;
-      twitchUserID = id;
-      userDatabase.editData({twitch_channel_username: username, twitch_channel_id: id});
-      res.send({status: "success"});
-    }
-  });
   // DEVICE ENDPOINTS
   app.get('/api/getDevices', async (req, res) => {
     // EventDB.listDevices()
@@ -325,6 +252,36 @@ export default async function API(){
     }
     EventDB.listActionsPerDevice(req.body.id,cb)
   });
+
+  app.post('/api/deleteDevice', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.device_DELETE(req.body.deviceId,cb)
+  });
+
+  app.post('/api/devicePerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.device_LIST(req.body.deviceId,cb)
+  });
+
+  app.post('/api/deviceUpdate', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.device_UPDATE(req.body.deviceId, req.body.deviceName, req.body.deviceLabel, req.body.deviceType,cb)
+  });
+
+
+
   // PRESET ENDPOINTS
   app.get('/api/getpresets', async (req, res) => {
     // EventDB.listDevices()
@@ -341,6 +298,32 @@ export default async function API(){
       res.send(data)
     }
     EventDB.presets_INSERT(req.body.presetName,req.body.defaultPreset,cb)
+  });
+  app.post('/api/deletePreset', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.presets_DELETE(req.body.presetId,cb)
+  });
+
+  app.post('/api/presetPerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.preset_LIST(req.body.presetId,cb)
+  });
+
+  app.post('/api/presetUpdate', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.presets_UPDATE(req.body.presetId,req.body.presetName,req.body.defaultPreset,cb)
   });
   // TRIGGER ENDPOINTS
   app.get('/api/getTriggers', async (req, res) => {
@@ -368,6 +351,123 @@ export default async function API(){
     EventDB.triggers_INSERT(req.body.triggerName,req.body.deviceId,req.body.triggerTypeId,req.body.triggerActionId,req.body.options,cb)
   });
 
+  app.post('/api/getTriggersPerPreset', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listTriggersPerPreset(req.body.presetId,cb)
+  });
+
+  app.post('/api/getTriggerIdForName', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.findIdForName(req.body.triggerName,cb)
+  });
+
+  app.post('/api/deleteTrigger', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.triggers_DELETE(req.body.triggerId,cb)
+  });
+
+  app.post('/api/presetPerTrigger', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.listPresetsPerTrigger(req.body.triggerId,cb)
+  });
+
+  app.post('/api/triggerPerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.trigger_LIST(req.body.triggerId,cb)
+  });
+
+  app.post('/api/triggerUpdate', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.triggers_UPDATE(req.body.triggerName,req.body.deviceId,req.body.triggerType,req.body.triggerActionId,req.body.options,req.body.triggerId,cb)
+  });
+
+  app.post('/api/triggerPresetMap', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.P2TMAP_INSERT(req.body.triggerId,req.body.presetId,cb)
+  });
+  app.post('/api/triggerPresetMapDelete', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.P2TMAP_DELETE(req.body.presetId,req.body.triggerId,cb)
+  });
+  app.post('/api/triggerMapDelete', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.P2TMAP_DELETE_TRIGGER(req.body.triggerId,cb)
+  });
+
+
+  app.post('/api/triggerDictPerId', async (req, res) => {
+    // EventDB.listDevices()
+    const cb = function (data) {
+      
+      res.send(data)
+    }
+    EventDB.dictFormatTrigger(req.body.triggerId,cb)
+  });
+
+
+
+  app.post('/api/receiveDict', async (req, res) => {
+    // EventDB.listDevices()
+    // console.log(req.body.triggerDict,"THIS IS OUR DICTIONARY")
+    console.log(req.body.triggerArray, 'incoming arrray')
+    triggerDict = req.body.triggerArray
+    console.log(triggerDict,'IN ORDER')
+    res.send('GOT IT')
+    
+  });
+
+  app.get('/api/getUserInfo', async (req, res) => {
+    if(twitchRefreshToken != null && twitchAccessToken != null && streamlabsAccessToken != null && streamlabsRefreshToken != null){
+      streamlabsAPIClient = new StreamLabsAPI(streamlabsAccessToken, streamlabsSocketToken, event_handler.findEventMatch);
+      twitchClient = new TwitchAPI(twitchChannelUsername, twitchDevUsername, twitchClientID, twitchAccessToken, twitchClientSecret, twitchUserID, twitchRefreshToken, event_handler.findEventMatch);
+      // start the Event Subscription API
+      await twitchClient.startEventSubs();
+      res.send('1');
+      return;
+    }else{
+      res.send('0');
+    }
+
+  });
+
+
+
 
   // Close the server gracefully 
   process.on('SIGTERM', () => {
@@ -383,5 +483,67 @@ export default async function API(){
     process.exit(0);
   });
 
-  return app;
+
+//|////////////////////////////////////////////////
+//  Definitions
+//|////////////////////////////////////////////////
+class Event_Handler {
+  //  Function Definitions
+  constructor() {
+    // dictionary to hold set triggers by GUI
+    triggerDict = Object();
+    triggerDict['donation'] = [];
+    triggerDict['follow'] = [];
+    triggerDict['channelPointRedemption'] = [];
+    triggerDict['subscription'] = [];
+    triggerDict['cheer'] = [];
+    triggerDict['chatMessage'] = [];
+    triggerDict['resub'] = [];
+
+  }
+
+  /* Incoming API message is matched to triggers set
+   * by the GUI, then sends triggers based off matches
+   */
+  findEventMatch(apiMessage) {
+    if (apiMessage.type in triggerDict) {
+      triggerDict[apiMessage.type].forEach(function (trigger, index) {
+          console.log(trigger.trigger_type_name)
+        switch(trigger.action) {
+          case 'setState':      LIFXAPIClient.setState(trigger.device_label, 'on', trigger.options); break;
+          case 'togglePower':   LIFXAPIClient.togglePower(trigger.device_label); break;
+          case 'breatheEffect': LIFXAPIClient.breatheEffect(trigger.device_label, trigger.options, "#000000", 1, 10); break;
+          case 'moveEffect':    LIFXAPIClient.moveEffect(trigger.device_label); break;
+          case 'pulseEffect':   LIFXAPIClient.pulseEffect(trigger.device_label, trigger.options, "#000000", 1, 10); break;
+          case 'wemoOn':        WEMOAPIClient.set_wemo_on(trigger.device_label); break;
+          case 'wemoOff':       WEMOAPIClient.set_wemo_off(trigger.device_label); break;
+          case 'usbOn':         USBAPIClient.turnOnUSBPorts(); break;
+          case 'usbOff':        USBAPIClient.turnOffUSBPorts(); break;
+          case 'gpioOn':        GPIOAPIClient.toggle(trigger.device_label, 1); break;
+          case 'gpioOff':       GPIOAPIClient.toggle(trigger.device_label, 0); break;
+          case 'playAudio':     streamlabsAPIClient.donationAlert(trigger.options); break;
+          case 'playTTS':       if (apiMessage.hasOwnProperty('message'))
+                                {
+                                    streamlabsAPIClient.ttsAlert(apiMessage.message); break;
+                                }
+                                else
+                                {
+                                    streamlabsAPIClient.ttsAlert(trigger.options); break;
+                                }
+        }
+      });
+    }
+  }
 }
+
+// Hardware Layer Instantiations
+const apiToken = 'c4621a4caa85f0cec707126c639dad3d6f3e2fd324d89ee496def6dd9c1f08c1';
+const LIFXAPIClient = new LIFXAPI(apiToken);
+const WEMOAPIClient = new WEMOAPI();
+const GPIOAPIClient = new GPIOAPI();
+const USBAPIClient = new USBAPI();
+await USBAPIClient.init();
+await LIFXAPIClient.init();
+
+// init the event handler
+const event_handler = new Event_Handler();

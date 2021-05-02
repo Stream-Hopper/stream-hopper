@@ -7,7 +7,7 @@ const exec = util.promisify(child_process.exec);
 class USBAPI {
   async init(){
     if(!fs.existsSync('./uhubctl')){
-      const { stdout, stderr } = await exec('./setup.sh')
+      const { stdout, stderr } = await exec('./hardware/setup.sh')
       .catch(err => {
         console.log(err);
       });

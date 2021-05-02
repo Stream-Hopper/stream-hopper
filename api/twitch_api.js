@@ -17,6 +17,8 @@ const ngrok = require('twitch-eventsub-ngrok');
 
 const fetch = require('node-fetch');
 
+var thisModal;
+
 class TwitchAPI {
     constructor(username, devUsername, clientID, accessToken, clientSecret, userID, refreshToken, eventHandlerFunc){
         this.opts = {
@@ -30,7 +32,8 @@ class TwitchAPI {
         this.accessToken = accessToken;
         this.clientSecret = clientSecret;
         this.userID = userID;
-        globalThis.eventHandlerFunc = eventHandlerFunc;
+        thisModal = this;
+        this.eventHandlerFunc = eventHandlerFunc;
         this.client = new tmi.client(this.opts);
         this.client.on('message', this.onMessage);
         this.client.on('subscription', this.onSubscription);
@@ -43,23 +46,13 @@ class TwitchAPI {
             console.log(err);
         });
         // Setup up EventSub Listener for EventSub Events (basically just for stuff not in tmi.js)
-        this.authProvider = new twitch_auth.ClientCredentialsAuthProvider(clientID, clientSecret);
-        /*this.refreshConfig = {
-            clientSecret,
-            refreshToken,
-            expiry: new Date(0),
-            onRefresh: async ({ accessToken, refreshToken, expiryDate }) => {
-                const newTokenData = {
-                    accessToken,
-                    refreshToken,
-                    expiryTimestamp: expiryDate === null ? null : expiryDate.getTime()
-                };
-                console.log(newTokenData);
+        this.authProvider = new twitch_auth.RefreshableAuthProvider(
+            new twitch_auth.ClientCredentialsAuthProvider(clientID, clientSecret),
+            {
+                clientSecret,
+                refreshToken,
             }
-        };
-        this.refreshingAuthProvider = new twitch_auth.RefreshableAuthProvider(this.authProvider, this.refreshConfig);
-        //this.refreshingAuthProvider.refresh();
-        */
+        );
         this.apiClient = new twitch.ApiClient({ authProvider: this.authProvider });
         this.listener = new twitch_eventsub.EventSubListener(this.apiClient, new ngrok.NgrokAdapter(), 'streamhopper');
     }
@@ -67,7 +60,7 @@ class TwitchAPI {
     static async getUserID(username, clientID){
         var baseUrl = `https://api.twitch.tv/kraken/users?login=${username}`;
 
-        const options = { 
+        const options = {
             method: 'GET',
             headers: {
                 'Accept': 'application/vnd.twitchtv.v5+json',
@@ -97,7 +90,7 @@ class TwitchAPI {
             "message": message,
             "type": "chatMessage"
         };
-        globalThis.eventHandlerFunc(response);
+        thisModal.eventHandlerFunc(response);
         console.log('%s: %s', userstate['display-name'], message);
     }
 
@@ -108,7 +101,7 @@ class TwitchAPI {
             "message": message,
             "type": "subscription"
         };
-        gloablThis.eventHandlerFunc(response);
+        thisModal.eventHandlerFunc(response);
         console.log('%s has subscribed', userstate['display-name']);
     }
 
@@ -120,19 +113,19 @@ class TwitchAPI {
             "months": months,
             "type": "resub"
         };
-        globalThis.eventHandlerFunc(response);
+        thisModal.eventHandlerFunc(response);
         console.log('%s has resubscribed for %d months', userstate['display-name'], months);
     }
 
     // Cheer handler, will forward response to control layer
-    onCheer(channel, username, method, message, userstate){
+    onCheer(channel, userstate, message){
         var response = {
             "sender": userstate['display-name'],
             "message": message,
             "amount": userstate['bits'],
             "type": "cheer"
         };
-        globalThis.eventHandlerFunc(response);
+        thisModal.eventHandlerFunc(response);
         console.log('%s has cheered %d bits', userstate['display-name'], userstate['bits']);
     }
 
@@ -142,7 +135,7 @@ class TwitchAPI {
             "sender": followEvent.userDisplayName,
             "type": "follow"
         };
-        globalThis.eventHandlerFunc(response);
+        thisModal.eventHandlerFunc(response);
         console.log("%s has followed %s at %s", followEvent.userDisplayName, followEvent.broadcasterDisplayName, followEvent.followDate);
     }
 
@@ -154,7 +147,7 @@ class TwitchAPI {
             "title": redemptionEvent.rewardTitle,
             "type": "channelPointRedemption"
         };
-        globalThis.eventHandlerFunc(response);
+        thisModal.eventHandlerFunc(response);
         console.log("%s has redeemed %s", redemptionEvent.userDisplayName, redemptionEvent.rewardTitle);
     }
 
@@ -165,7 +158,7 @@ class TwitchAPI {
         });
         await this.apiClient.helix.eventSub.deleteAllSubscriptions();
         await this.listener.subscribeToChannelFollowEvents(this.userID, this.onFollow);
-        //await this.listener.subscribeToChannelRedemptionAddEvents(this.userID, this.onFollow);
+        await this.listener.subscribeToChannelRedemptionAddEvents(this.userID, this.onChannelPointRedemption);
     }
 }
 

@@ -62,6 +62,16 @@ function UserInfo(){
 
     }
     }
+
+    function handleTwitchClick(){
+        axios.get('http://localhost:8080/api/getUserInfo').then( (res) => {
+            if(res.data == 1){
+                history.push('/control');
+            }else{
+                window.alert("Verfication Failed...")
+            }
+        });
+    }
     
     return(
 
@@ -98,7 +108,7 @@ function UserInfo(){
             </tbody>
             </Table>
             <div>
-                <button disabled={twitchVerification!=='Verified'||streamLabsVerification!=='Verified'} onClick={()=>{history.push('/control')}}>Twitch it Up</button>
+                <button disabled={twitchVerification!=='Verified'||streamLabsVerification!=='Verified'} onClick={()=>{handleTwitchClick()}}>Twitch it Up</button>
             </div>
             </div>
         </div>

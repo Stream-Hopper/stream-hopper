@@ -37,28 +37,51 @@ class EventDatabase {
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
 
-        return response;
+        //return response;
     }
 
-    device_UPDATE(device_id, device_name, device_label, device_type) {
+    device_UPDATE(device_id, device_name, device_label, device_type,cb) {
         let sql = `UPDATE DEVICES SET device_name=?, device_label=?, device_type=? WHERE device_id=?;`;
 
         this.db.run(sql, [device_name, device_label, device_type, device_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('UPDATED')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
     }
 
-    device_DELETE(device_id) {
+    device_DELETE(device_id,cb) {
         let sql = `DELETE FROM DEVICES WHERE device_id=?;`;
 
         this.db.run(sql, [device_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('Good Riddance')
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
+    device_LIST(device_id,cb) {
+        let sql = `SELECT * FROM DEVICES WHERE device_id=?;`;
+        let data = []
+        this.db.all(sql, [device_id],(err,rows) => {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            rows.forEach(row => {
+                console.log(row);
+                data.push(row)
+            });
+
+            cb(data);
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -81,25 +104,48 @@ class EventDatabase {
         });
     }
 
-    presets_UPDATE(preset_id, preset_name, default_preset) {
+    presets_UPDATE(preset_id, preset_name, default_preset,cb) {
         let sql = `UPDATE PRESETS SET preset_name=?, default_preset=? WHERE preset_id=?;`;
 
         this.db.run(sql, [preset_name, default_preset, preset_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('PRESET UPDATED')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
     }
 
-    presets_DELETE(preset_id) {
+    presets_DELETE(preset_id,cb) {
         let sql = `DELETE FROM PRESETS WHERE preset_id=?;`;
 
         this.db.run(sql, [preset_id], function (err) {
             if (err) {
+                cb(err)
                 return console.log(err.message);
             }
+            cb('GOOD RIDDANCE')
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
+    preset_LIST(preset_id,cb) {
+        let sql = `SELECT * FROM PRESETS WHERE preset_id=?;`;
+        let data = []
+        this.db.all(sql, [preset_id],(err,rows) => {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            rows.forEach(row => {
+                console.log(row);
+                data.push(row)
+            });
+
+            cb(data);
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -122,40 +168,65 @@ class EventDatabase {
         });
     }
 
-    triggers_UPDATE(trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id) {
+    triggers_UPDATE(trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id,cb) {
         let sql = `UPDATE TRIGGERS SET trigger_name=?, device_id=?, trigger_type=?, trigger_action_id=?, options=? WHERE trigger_id=?;`;
 
         this.db.run(sql, [trigger_name, device_id, trigger_type, trigger_action_id, options, trigger_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('UPDATE TRIGGER')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
     }
 
-    triggers_DELETE(trigger_id) {
+    triggers_DELETE(trigger_id,cb) {
         let sql = `DELETE FROM TRIGGERS WHERE trigger_id=?;`;
 
         this.db.run(sql, [trigger_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb("GOOD RIDDANCE")
             // get the last insert id
             //.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
+    trigger_LIST(trigger_id,cb) {
+        let sql = `SELECT * FROM TRIGGERS WHERE trigger_id=?;`;
+        let data = []
+        this.db.all(sql, [trigger_id],(err,rows) => {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            rows.forEach(row => {
+                console.log(row);
+                data.push(row)
+            });
+
+            cb(data);
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
     }
 
     ///////////////////////////////////////
     /// PRESET_2_TRIGGER_MAP QUERIES
     ///////////////////////////////////////
-    P2TMAP_INSERT(trigger_id, preset_id) {
+    P2TMAP_INSERT(trigger_id, preset_id,cb) {
         let sql = `INSERT INTO PRESET_2_TRIGGER_MAP VALUES(NULL,?,?);`;
-
+        // let data=[]
         this.db.run(sql, [preset_id, trigger_id], function (err) {
             if (err) {
+                cb(err)
                 return console.log(err.message);
             }
+            cb('MAPPING DONE')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -173,13 +244,29 @@ class EventDatabase {
         });
     }
 
-    P2TMAP_DELETE(preset_id, trigger_id) {
+    P2TMAP_DELETE(preset_id, trigger_id,cb) {
         let sql = `DELETE FROM PRESET_2_TRIGGER_MAP WHERE preset_id=? AND trigger_id=?;`;
 
         this.db.run(sql, [preset_id, trigger_id], function (err) {
             if (err) {
+                cb(err.message)
                 return console.log(err.message);
             }
+            cb('GOOD RIDDANCE')
+            // get the last insert id
+            //console.log(`A row has been inserted with rowid ${this.lastID}`);
+        });
+    }
+
+    P2TMAP_DELETE_TRIGGER(trigger_id,cb) {
+        let sql = `DELETE FROM PRESET_2_TRIGGER_MAP WHERE trigger_id=?;`;
+
+        this.db.run(sql, [preset_id, trigger_id], function (err) {
+            if (err) {
+                cb(err.message)
+                return console.log(err.message);
+            }
+            cb('GOOD RIDDANCE')
             // get the last insert id
             //console.log(`A row has been inserted with rowid ${this.lastID}`);
         });
@@ -238,7 +325,7 @@ class EventDatabase {
     }
 
     listDeviceType(cb) {
-        let sql = `SELECT device_type_id, name FROM DEVICE_TYPE;`;
+        let sql = `SELECT device_type_id, device_type_name FROM DEVICE_TYPE;`;
         let data=[]
         this.db.all(sql, [], (err, rows) => {
             if (err) {
@@ -286,57 +373,87 @@ class EventDatabase {
         });
     }
 
-    listPresetsPerTrigger(trigger_id) {
-        let sql = `SELECT preset_id, preset_name FROM PRESETS WHERE preset_id = (SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?);`;
-
+    listPresetsPerTrigger(trigger_id,cb) {
+        let sql = `SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?;`;
+        let data = []
         this.db.all(sql, [trigger_id], (err, rows) => {
             if (err) {
+                cd(Error)
                 throw err;
+
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
+    // listPresetsPerTrigger(trigger_id,cb) {
+    //     let sql = `SELECT preset_id, preset_name FROM PRESETS WHERE preset_id = (SELECT preset_id FROM PRESET_2_TRIGGER_MAP WHERE trigger_id = ?);`;
+    //     let data = []
+    //     this.db.all(sql, [trigger_id], (err, rows) => {
+    //         if (err) {
+    //             cd(Error)
+    //             throw err;
 
-    findIdForName(trigger_name) {
+    //         }
+    //         rows.forEach((row) => {
+    //             console.log(row);
+    //             data.push(row)
+    //         });
+    //         cb(data)
+    //     });
+    // }
+
+    findIdForName(trigger_name,cb) {
         let sql = `SELECT trigger_id FROM TRIGGERS WHERE trigger_name = ?;`;
+        let data=[]
 
         this.db.all(sql, [trigger_name], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 
-    listTriggersPerPreset(preset_id) {
+    listTriggersPerPreset(preset_id,cb) {
         let sql = `SELECT trigger_id FROM PRESET_2_TRIGGER_MAP WHERE preset_id = ?;`;
-
+        let data = []
         this.db.all(sql, [preset_id], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 
-    dictFormatTrigger(trigger_id) {
+    dictFormatTrigger(trigger_id,cb) {
         let sql = `SELECT t.trigger_id, t.trigger_name, d.device_name, d.device_label, ta.action,tt.trigger_type_name, t.options  
                     FROM TRIGGERS t,DEVICES d,TRIGGER_ACTIONS ta,TRIGGER_TYPE tt 
                     WHERE trigger_id=? AND t.device_id=d.device_id AND t.trigger_type=tt.trigger_type_id AND t.trigger_action_id=ta.trigger_action_id;`;
-
+        let data = []
         this.db.all(sql, [trigger_id], (err, rows) => {
             if (err) {
+                cb(err)
                 throw err;
             }
             rows.forEach((row) => {
                 console.log(row);
+                data.push(row)
             });
+            cb(data)
         });
     }
 
@@ -352,11 +469,11 @@ class EventDatabase {
                 "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (2, 'Lifx')\;" +
                 "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (3, 'Wemo')\;" +
                 "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (4, 'GPIO')\;" +
+                "INSERT INTO DEVICE_TYPE (device_type_id, device_type_name) VALUES (5, 'Audio')\;" +
 
 
                 "DROP TABLE IF EXISTS DEVICES\;" +
                 "CREATE TABLE DEVICES (device_id INTEGER PRIMARY KEY UNIQUE NOT NULL, device_name STRING UNIQUE NOT NULL, device_label STRING, device_type REFERENCES " + "DEVICE_TYPE (device_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL)\;" +
-                "INSERT INTO DEVICES (device_id, device_name, device_label, device_type) VALUES (1, 'lab bulb', 'Lightbulb', 2)\;" +
 
 
                 "DROP TABLE IF EXISTS PRESET_2_TRIGGER_MAP\;" +
@@ -364,8 +481,6 @@ class EventDatabase {
 
                 "DROP TABLE IF EXISTS PRESETS\;" +
                 "CREATE TABLE PRESETS (preset_id INTEGER PRIMARY KEY UNIQUE NOT NULL, preset_name STRING UNIQUE NOT NULL, default_preset BOOLEAN NOT NULL)\;" +
-                "INSERT INTO PRESETS (preset_id, preset_name, default_preset) VALUES (1, 'Default Preset', 1)\;" +
-                "INSERT INTO PRESETS (preset_id, preset_name, default_preset) VALUES (3, 'TEST PRESET', 0)\;" +
 
 
                 "DROP TABLE IF EXISTS TRIGGER_ACTIONS\;" +
@@ -381,6 +496,8 @@ class EventDatabase {
                 "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (9, 'usbOff', 1)\;" +
                 "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (10, 'gpioOn', 4)\;" +
                 "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (11, 'gpioOff', 4)\;" +
+                "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (12, 'playAudio', 5)\;" +
+                "INSERT INTO TRIGGER_ACTIONS (trigger_action_id, \"action\", device_type) VALUES (13, 'playTTS', 5)\;" +
                 "DROP TABLE IF EXISTS TRIGGER_TYPE\;" +
                 "CREATE TABLE TRIGGER_TYPE (trigger_type_id INTEGER PRIMARY KEY UNIQUE NOT NULL, trigger_type_name STRING UNIQUE NOT NULL)\;" +
                 "INSERT INTO TRIGGER_TYPE (trigger_type_id, trigger_type_name) VALUES (1, 'donation')\;" +
@@ -395,8 +512,6 @@ class EventDatabase {
                 "   INTEGER REFERENCES DEVICES (device_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_type INTEGER REFERENCES " +
                 "TRIGGER_TYPE (trigger_type_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, trigger_action_id INTEGER REFERENCES " +
                 "TRIGGER_ACTIONS (trigger_action_id) ON DELETE CASCADE ON UPDATE CASCADE NOT NULL, options STRING)\;" +
-                "INSERT INTO TRIGGERS (trigger_id, trigger_name, device_id, trigger_type, trigger_action_id, options) VALUES (1, 'test_trigger', 1, 6, 1, '#FFFFFF')\;" +
-                "INSERT INTO TRIGGERS (trigger_id, trigger_name, device_id, trigger_type, trigger_action_id, options) VALUES (2, 'TEST TRIGGER 2', 1, 2, 2, '#BBBBBB')\;" +
                 "DROP TABLE IF EXISTS USER\;" +
                 "COMMIT TRANSACTION\;" +
                 "PRAGMA foreign_keys = on;");
