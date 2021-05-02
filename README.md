@@ -4,6 +4,11 @@
 
 Run ```npm i``` in the ```~/stream-hopper``` and ```~/stream-hopper/gui``` directories to install the dependencies needed for the application
 
+### Dependencies
+
+- React 16
+- Node v14.16.0
+
 ## Start-up
 
 Run ```npm run start``` in the ```~/stream-hopper``` to launch the app in the browser.
